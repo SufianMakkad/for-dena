@@ -34,9 +34,8 @@
   decided which option to use.
 */
 window.SONGS = [
-  { title: "Lilies", artist: "Ethel Cain, Mercy Necromancy" },
   { title: "Ripples of Past Reverie", artist: "HOYO-MiX, Cassie Wei" },
+  { title: "Lilies", artist: "Ethel Cain, Mercy Necromancy" },
   { title: "Carousel", artist: "Laufey" },
-  { title: "Nobody New", artist: "The Marías" },
   { title: "Favorite Apple", artist: "The Two Lips" },
 ];
