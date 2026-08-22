@@ -206,16 +206,13 @@
     container._scrollAnimFrame = requestAnimationFrame(step);
   }
 
-  function easeAnchorIntoView(container, anchorEl){
-    requestAnimationFrame(() => {
-      const containerRect = container.getBoundingClientRect();
-      const anchorRect = anchorEl.getBoundingClientRect();
-      const bottomMargin = 28; // breathing room below the anchor
-      const overflow = anchorRect.bottom - (containerRect.bottom - bottomMargin);
-      if (overflow > 0){
-        animateScrollTo(container, container.scrollTop + overflow);
-      }
-    });
+  function easeAnchorIntoView(container, anchorRect){
+    const containerRect = container.getBoundingClientRect();
+    const bottomMargin = 28; // breathing room below the anchor
+    const overflow = anchorRect.bottom - (containerRect.bottom - bottomMargin);
+    if (overflow > 0){
+      animateScrollTo(container, container.scrollTop + overflow);
+    }
   }
 
   // ---- Tap-to-reveal story text (slide 2) ----
@@ -266,13 +263,13 @@
         });
       });
     }
-    easeAnchorIntoView(nextScreenEl, tapHint);
+    easeAnchorIntoView(nextScreenEl, afterRect);
 
     if (storyIndex >= storyLines.length){
       tapHint.classList.add('is-hidden');
       setTimeout(() => {
         forwardBtn.classList.add('is-visible');
-        easeAnchorIntoView(nextScreenEl, forwardBtn);
+        easeAnchorIntoView(nextScreenEl, forwardBtn.getBoundingClientRect());
       }, 1000);
     }
   }
@@ -482,13 +479,13 @@
           });
         });
       }
-      easeAnchorIntoView(container, tapHint);
+      easeAnchorIntoView(container, afterRect);
 
       if (index >= lines.length){
         tapHint.classList.add('is-hidden');
         setTimeout(() => {
           forwardBtn.classList.add('is-visible');
-          easeAnchorIntoView(container, forwardBtn);
+          easeAnchorIntoView(container, forwardBtn.getBoundingClientRect());
         }, 1000);
       }
     }
