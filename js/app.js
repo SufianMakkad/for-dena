@@ -310,6 +310,69 @@
     forwardBtn.classList.remove('is-visible');
   }
 
+  // ---- Tap-to-reveal story text (page 3 / placeholder screen) ----
+  // Same tap-to-reveal mechanic as page 2's storyLines, just a separate
+  // array/state so the two screens don't interfere with each other.
+  const storyLines3 = [
+    "you make me feel as if im floating",
+    "when we have nothing, you still love me",
+    "when it feels like we have everything, you still love me",
+    "i feel safe in your arms",
+    "i feel like you are the answer to all my prayers, all of them",
+    'ive never seen a more perfect girl than you my love <svg class="story-heart" viewBox="0 0 64 64"><use href="#s-heart"/></svg>'
+  ];
+  const storyLinesEl3 = document.getElementById('story-lines-3');
+  const tapHint3 = document.getElementById('tap-hint-3');
+  let storyIndex3 = 0;
+
+  function revealNextStoryLine3(){
+    if (storyIndex3 >= storyLines3.length) return;
+
+    const beforeRect = tapHint3.getBoundingClientRect();
+
+    const p = document.createElement('p');
+    p.className = 'story-line';
+    p.innerHTML = storyLines3[storyIndex3];
+    storyLinesEl3.appendChild(p);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => p.classList.add('is-shown'));
+    });
+    storyIndex3++;
+
+    const afterRect = tapHint3.getBoundingClientRect();
+    const deltaY = beforeRect.top - afterRect.top;
+    if (deltaY !== 0){
+      tapHint3.style.transition = 'none';
+      tapHint3.style.transform = `translateY(${deltaY}px)`;
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          tapHint3.style.transition = 'transform 1s cubic-bezier(0.22, 1, 0.36, 1)';
+          tapHint3.style.transform = 'translateY(0)';
+        });
+      });
+    }
+
+    if (storyIndex3 >= storyLines3.length){
+      tapHint3.classList.add('is-hidden');
+      setTimeout(() => {
+        forwardBtn3.classList.add('is-visible');
+      }, 1000);
+    }
+  }
+
+  function startStory3(){
+    if (storyIndex3 === 0) revealNextStoryLine3();
+  }
+
+  function resetStory3(){
+    storyIndex3 = 0;
+    storyLinesEl3.innerHTML = '';
+    tapHint3.classList.remove('is-hidden');
+    tapHint3.style.transition = '';
+    tapHint3.style.transform = '';
+    forwardBtn3.classList.remove('is-visible');
+  }
+
   // ---- Forward button (page 1 -> page 2) ----
   // Slides the new blank placeholder screen in on top of everything.
   const forwardBtn = document.getElementById('forward-btn');
@@ -321,6 +384,14 @@
     placeholderScreen.classList.add('is-active');
     currentPageIndex = 2;
     updateDots();
+    startStory3();
+  });
+
+  // Tapping anywhere on the placeholder screen (except its buttons)
+  // reveals the next story line, same as page 2.
+  placeholderScreen.addEventListener('click', (e) => {
+    if (e.target.closest('#forward-btn-3') || e.target.closest('#back-btn-3')) return;
+    revealNextStoryLine3();
   });
 
   // ---- Placeholder forward button (page 2 -> page 3) ----
@@ -342,6 +413,7 @@
     placeholderScreen.classList.remove('is-active');
     currentPageIndex = 1;
     updateDots();
+    resetStory3();
   });
 
   // ---- Reveal button (page 3 -> page 4) ----

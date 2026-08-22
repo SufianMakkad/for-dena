@@ -288,20 +288,24 @@
     transform: translate(var(--parallax-x), var(--parallax-y));
     transition: transform 0.5s ease-out;
   }
-  #next-screen-inner .story-line{
+  #next-screen-inner .story-line,
+  #placeholder-inner .story-line{
     margin-bottom:20px;
     opacity:0;
     transform: translateY(3px);
     transition: opacity 2.2s cubic-bezier(0.25, 0.1, 0.25, 1), transform 2.2s cubic-bezier(0.25, 0.1, 0.25, 1);
   }
-  #next-screen-inner .story-line.is-shown{
+  #next-screen-inner .story-line.is-shown,
+  #placeholder-inner .story-line.is-shown{
     opacity:1;
     transform: translateY(0);
   }
-  #next-screen-inner .story-line:last-child{
+  #next-screen-inner .story-line:last-child,
+  #placeholder-inner .story-line:last-child{
     margin-bottom:0;
   }
-  #next-screen-inner .story-heart{
+  #next-screen-inner .story-heart,
+  #placeholder-inner .story-heart{
     width:0.85em;
     height:0.85em;
     fill:#D6699A;
@@ -450,20 +454,19 @@
     outline-offset:6px;
     border-radius:10px;
   }
-  #placeholder-screen .placeholder-inner{
+  #placeholder-inner{
+    text-align:center;
+    color:#D6699A;
+    font-family:'Baloo 2', sans-serif;
+    font-weight:400;
+    font-size:1.05rem;
+    line-height:1.8;
+    letter-spacing:0.01em;
+    max-width:380px;
+    padding:0 32px;
     display:flex;
     flex-direction:column;
     align-items:center;
-    gap:32px;
-    padding:0 32px;
-    text-align:center;
-  }
-  #placeholder-screen .placeholder-text{
-    font-family:'Caveat Brush', 'Baloo 2', sans-serif;
-    font-weight:400;
-    font-size:1.7rem;
-    color:#D6699A;
-    letter-spacing:0.01em;
   }
   #forward-btn-3{
     position:relative;
@@ -476,9 +479,18 @@
     display:flex;
     align-items:center;
     justify-content:center;
-    transition: transform 0.2s ease;
+    margin-top:20px;
+    opacity:0;
+    transform: translateY(6px);
+    pointer-events:none;
+    transition: transform 0.2s ease, opacity 0.6s ease;
   }
-  #forward-btn-3:hover{
+  #forward-btn-3.is-visible{
+    opacity:1;
+    transform: translateY(0);
+    pointer-events:auto;
+  }
+  #forward-btn-3.is-visible:hover{
     transform: translateY(-2px) rotate(1deg);
   }
   #forward-btn-3:focus-visible{
