@@ -1516,13 +1516,13 @@
     font-size:1.05rem;
     letter-spacing:0.04em;
     text-transform:lowercase;
-    color:var(--ink);
+    color:var(#D6699A);
     animation: entryPulse 1.8s ease-in-out infinite;
   }
   #entry-btn .entry-heart{
     width:40px;
     height:40px;
-    fill:var(--pink);
+    fill:var(#D6699A);
     filter: drop-shadow(0 2px 6px rgba(230,120,160,0.4));
   }
   @keyframes entryPulse{
