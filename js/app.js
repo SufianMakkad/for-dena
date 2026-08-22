@@ -171,6 +171,41 @@
   // this eases the container's scroll position up just enough to bring
   // a given anchor element (the tap hint, or the forward button once
   // revealed) comfortably into view.
+  // Slow, hand-eased scroll (rather than the browser's native 'smooth'
+  // behavior, which is quick and varies from browser to browser). Runs
+  // over a fixed duration with an ease-in-out curve so each new line
+  // drifts up gently instead of snapping into place.
+  const SCROLL_EASE_MS = 900;
+
+  function easeInOutCubic(t){
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  }
+
+  function animateScrollTo(container, targetTop){
+    const startTop = container.scrollTop;
+    const distance = targetTop - startTop;
+    if (Math.abs(distance) < 1) return;
+
+    // Cancel any in-flight scroll animation on this container so rapid
+    // taps don't fight each other and cause jitter.
+    if (container._scrollAnimFrame){
+      cancelAnimationFrame(container._scrollAnimFrame);
+    }
+
+    const startTime = performance.now();
+    function step(now){
+      const elapsed = now - startTime;
+      const t = Math.min(1, elapsed / SCROLL_EASE_MS);
+      container.scrollTop = startTop + distance * easeInOutCubic(t);
+      if (t < 1){
+        container._scrollAnimFrame = requestAnimationFrame(step);
+      } else {
+        container._scrollAnimFrame = null;
+      }
+    }
+    container._scrollAnimFrame = requestAnimationFrame(step);
+  }
+
   function easeAnchorIntoView(container, anchorEl){
     requestAnimationFrame(() => {
       const containerRect = container.getBoundingClientRect();
@@ -178,34 +213,9 @@
       const bottomMargin = 28; // breathing room below the anchor
       const overflow = anchorRect.bottom - (containerRect.bottom - bottomMargin);
       if (overflow > 0){
-        container.scrollTo({ top: container.scrollTop + overflow, behavior: 'smooth' });
+        animateScrollTo(container, container.scrollTop + overflow);
       }
     });
-  }
-
-  // ---- Shrink long lines to fit on one line ----
-  // Most story lines fit fine at the default size, but a few longer ones
-  // wrap onto a second line. Rather than wrapping, shrink just that
-  // line's font-size until it fits on one line (down to a floor so it
-  // never gets illegibly small). line-height on .story-line is unitless
-  // (inherited as 1.8), so it scales down automatically along with the
-  // font-size — no separate adjustment needed there.
-  function fitLineToOneLine(el){
-    const minRatio = 0.66; // don't shrink past 66% of the base size
-    const startSize = parseFloat(window.getComputedStyle(el).fontSize);
-    const minSize = startSize * minRatio;
-    let size = startSize;
-
-    // A line that hasn't wrapped has scrollHeight roughly equal to one
-    // line-height; comparing against 1.15x that catches wrapped lines
-    // while tolerating normal sub-pixel rounding.
-    const oneLineHeight = () => parseFloat(window.getComputedStyle(el).lineHeight);
-    if (el.scrollHeight <= oneLineHeight() * 1.15) return;
-
-    while (el.scrollHeight > oneLineHeight() * 1.15 && size > minSize){
-      size -= 0.5;
-      el.style.fontSize = size + 'px';
-    }
   }
 
   // ---- Tap-to-reveal story text (slide 2) ----
@@ -237,7 +247,6 @@
     p.className = 'story-line';
     p.innerHTML = storyLines[storyIndex];
     storyLinesEl.appendChild(p);
-    fitLineToOneLine(p);
     // Add 'is-shown' a frame later so the opacity/transform transition
     // actually plays instead of snapping straight to visible.
     requestAnimationFrame(() => {
@@ -456,7 +465,6 @@
       p.className = 'story-line';
       p.innerHTML = lines[index];
       linesEl.appendChild(p);
-      fitLineToOneLine(p);
       requestAnimationFrame(() => {
         requestAnimationFrame(() => p.classList.add('is-shown'));
       });
