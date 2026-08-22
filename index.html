@@ -20,6 +20,19 @@
 </head>
 <body>
 
+<!-- ---- Entry overlay ----
+     Full-screen blurred veil shown the instant the page loads, before
+     anything else is reachable. Tapping the button is a real, unambiguous
+     user gesture — so it's used to start the music with total certainty
+     (no autoplay-policy guesswork needed) in the same instant it fades
+     the blur away to reveal the envelope underneath. -->
+<div id="entry-overlay">
+  <button id="entry-btn" aria-label="Tap to enter">
+    <svg class="entry-heart" viewBox="0 0 64 64"><use href="#s-heart"/></svg>
+    <span>tap to enter</span>
+  </button>
+</div>
+
 <!-- Fixed full-screen layer for the tap-burst hearts/petals. Sits above
      everything so particles fly out over the text/buttons; pointer-events
      none so it never blocks taps underneath. -->
@@ -241,7 +254,7 @@
   </div>
 </div>
 
-<audio id="bg-music" preload="auto"></audio>
+<audio id="bg-music" preload="auto" autoplay muted playsinline></audio>
 
 
 <script src="js/playlist-data.js"></script>
