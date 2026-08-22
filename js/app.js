@@ -6,7 +6,17 @@
   const bgLayer = document.getElementById('bg-layer');
   const flowerLayer = document.getElementById('flower-layer');
   const nextScreenParallax = document.getElementById('next-screen-parallax');
-  const placeholderParallax = document.getElementById('placeholder-parallax');
+  // All the tap-to-reveal story screens (placeholder + screens 4-7) get
+  // the same text-layer parallax as page 2 — collected into one list so
+  // adding a future page just means adding its element here.
+  const storyParallaxEls = [
+    document.getElementById('placeholder-parallax'),
+    document.getElementById('parallax-4'),
+    document.getElementById('parallax-5'),
+    document.getElementById('parallax-6'),
+    document.getElementById('parallax-7'),
+    document.getElementById('parallax-8')
+  ].filter(Boolean);
   const isDesktop = window.matchMedia('(pointer: fine)').matches;
 
   if (isDesktop) {
@@ -27,8 +37,10 @@
       bgLayer.style.transform = `translate(${xFraction * maxDriftBg}px, ${yFraction * maxDriftBg}px)`;
       nextScreenParallax.style.setProperty('--parallax-x', `${xFraction * maxDriftText}px`);
       nextScreenParallax.style.setProperty('--parallax-y', `${yFraction * maxDriftText}px`);
-      placeholderParallax.style.setProperty('--parallax-x', `${xFraction * maxDriftText}px`);
-      placeholderParallax.style.setProperty('--parallax-y', `${yFraction * maxDriftText}px`);
+      storyParallaxEls.forEach((el) => {
+        el.style.setProperty('--parallax-x', `${xFraction * maxDriftText}px`);
+        el.style.setProperty('--parallax-y', `${yFraction * maxDriftText}px`);
+      });
     });
   } else {
     // ---- Tilt parallax, phones only ----
@@ -51,8 +63,10 @@
       bgLayer.style.transform = `translate(${xFraction * maxDriftBg}px, ${yFraction * maxDriftBg}px)`;
       nextScreenParallax.style.setProperty('--parallax-x', `${xFraction * maxDriftText}px`);
       nextScreenParallax.style.setProperty('--parallax-y', `${yFraction * maxDriftText}px`);
-      placeholderParallax.style.setProperty('--parallax-x', `${xFraction * maxDriftText}px`);
-      placeholderParallax.style.setProperty('--parallax-y', `${yFraction * maxDriftText}px`);
+      storyParallaxEls.forEach((el) => {
+        el.style.setProperty('--parallax-x', `${xFraction * maxDriftText}px`);
+        el.style.setProperty('--parallax-y', `${yFraction * maxDriftText}px`);
+      });
     }
 
 
@@ -92,7 +106,7 @@
   // TOTAL_PAGES + currentPageIndex track where she is in the journey.
   // Bump TOTAL_PAGES (and add a matching .dot in the HTML) each time a
   // new page is added.
-  const TOTAL_PAGES = 9; // envelope (0) + next-screen (1) + placeholder/3 (2) + screen-6/7/4/5 in that order (3-6) + letterbox reveal (7) + discord (8)
+  const TOTAL_PAGES = 10; // envelope (0) + next-screen (1) + placeholder/3 (2) + screen-6/7/4/5/8 in that order (3-7) + letterbox reveal (8) + discord (9)
   let currentPageIndex = 0;
 
   function updateDots(){
@@ -169,6 +183,31 @@
     });
   }
 
+  // ---- Shrink long lines to fit on one line ----
+  // Most story lines fit fine at the default size, but a few longer ones
+  // wrap onto a second line. Rather than wrapping, shrink just that
+  // line's font-size until it fits on one line (down to a floor so it
+  // never gets illegibly small). line-height on .story-line is unitless
+  // (inherited as 1.8), so it scales down automatically along with the
+  // font-size — no separate adjustment needed there.
+  function fitLineToOneLine(el){
+    const minRatio = 0.66; // don't shrink past 66% of the base size
+    const startSize = parseFloat(window.getComputedStyle(el).fontSize);
+    const minSize = startSize * minRatio;
+    let size = startSize;
+
+    // A line that hasn't wrapped has scrollHeight roughly equal to one
+    // line-height; comparing against 1.15x that catches wrapped lines
+    // while tolerating normal sub-pixel rounding.
+    const oneLineHeight = () => parseFloat(window.getComputedStyle(el).lineHeight);
+    if (el.scrollHeight <= oneLineHeight() * 1.15) return;
+
+    while (el.scrollHeight > oneLineHeight() * 1.15 && size > minSize){
+      size -= 0.5;
+      el.style.fontSize = size + 'px';
+    }
+  }
+
   // ---- Tap-to-reveal story text (slide 2) ----
   // Lines are revealed one at a time on tap, each fading/rising into
   // place. Once the last line is shown, the "tap to continue" hint fades
@@ -198,6 +237,7 @@
     p.className = 'story-line';
     p.innerHTML = storyLines[storyIndex];
     storyLinesEl.appendChild(p);
+    fitLineToOneLine(p);
     // Add 'is-shown' a frame later so the opacity/transform transition
     // actually plays instead of snapping straight to visible.
     requestAnimationFrame(() => {
@@ -416,6 +456,7 @@
       p.className = 'story-line';
       p.innerHTML = lines[index];
       linesEl.appendChild(p);
+      fitLineToOneLine(p);
       requestAnimationFrame(() => {
         requestAnimationFrame(() => p.classList.add('is-shown'));
       });
@@ -538,6 +579,22 @@
     document.getElementById('screen-7')
   );
 
+  const story8 = createStoryScreen(
+    [
+      "dena, please continue to choose me, and only me",
+      "please continue to spend your time with me",
+      "no matter what it is",
+      "please keep shining full of energy every day",
+      "please keep being with me no matter what",
+      "please continue to love me",
+      `i love you <svg class="story-heart" viewBox="0 0 64 64"><use href="#s-heart"/></svg>`
+    ],
+    document.getElementById('story-lines-8'),
+    document.getElementById('tap-hint-8'),
+    document.getElementById('forward-btn-8'),
+    document.getElementById('screen-8')
+  );
+
   // ---- Forward button (page 1 -> page 2 story screen, i.e. placeholder) ----
   const forwardBtn = document.getElementById('forward-btn');
   const screenReveal = document.getElementById('screen-reveal');
@@ -551,7 +608,8 @@
     { el: document.getElementById('screen-6'), story: story6, back: document.getElementById('back-btn-6'), forward: document.getElementById('forward-btn-6'), pageIndex: 3 },
     { el: document.getElementById('screen-7'), story: story7, back: document.getElementById('back-btn-7'), forward: document.getElementById('forward-btn-7'), pageIndex: 4 },
     { el: document.getElementById('screen-4'), story: story4, back: document.getElementById('back-btn-4'), forward: document.getElementById('forward-btn-4'), pageIndex: 5 },
-    { el: document.getElementById('screen-5'), story: story5, back: document.getElementById('back-btn-5'), forward: document.getElementById('forward-btn-5'), pageIndex: 6 }
+    { el: document.getElementById('screen-5'), story: story5, back: document.getElementById('back-btn-5'), forward: document.getElementById('forward-btn-5'), pageIndex: 6 },
+    { el: document.getElementById('screen-8'), story: story8, back: document.getElementById('back-btn-8'), forward: document.getElementById('forward-btn-8'), pageIndex: 7 }
   ];
 
   forwardBtn.addEventListener('click', (e) => {
@@ -584,7 +642,7 @@
         next.story.start();
       } else {
         screenReveal.classList.add('is-active');
-        currentPageIndex = 7;
+        currentPageIndex = 8;
         updateDots();
       }
     });
@@ -609,17 +667,17 @@
     });
   });
 
-  // ---- Reveal button (page 7's screen -> Discord) ----
+  // ---- Reveal button (last story screen -> Discord) ----
   // Slides the letterbox bars away and fades in the Discord invite that
   // was sitting underneath them the whole time.
   const revealBtn = document.getElementById('reveal-btn');
   revealBtn.addEventListener('click', () => {
     screenReveal.classList.add('revealed');
-    currentPageIndex = 8;
+    currentPageIndex = 9;
     updateDots();
   });
 
-  // ---- Second back button (letterbox/discord -> page 7's screen) ----
+  // ---- Second back button (letterbox/discord -> last story screen) ----
   // Hides the reveal screen and brings the last story screen back, then
   // once it's fully faded out, resets the reveal screen to its locked
   // state so she can open it again from the top.
