@@ -92,7 +92,7 @@
   // TOTAL_PAGES + currentPageIndex track where she is in the journey.
   // Bump TOTAL_PAGES (and add a matching .dot in the HTML) each time a
   // new page is added.
-  const TOTAL_PAGES = 5; // envelope (0) + next-screen (1) + placeholder (2) + letterbox reveal (3) + discord (4)
+  const TOTAL_PAGES = 9; // envelope (0) + next-screen (1) + placeholder (2) + screen-4..7 (3-6) + letterbox reveal (7) + discord (8)
   let currentPageIndex = 0;
 
   function updateDots(){
@@ -378,68 +378,228 @@
     forwardBtn3.classList.remove('is-visible');
   }
 
-  // ---- Forward button (page 1 -> page 2) ----
-  // Slides the new blank placeholder screen in on top of everything.
+  // ---- Tap-to-reveal story text (pages 3–7) ----
+  // Generic version of page 2's storyLines mechanic, so every later page
+  // is guaranteed to behave identically — same fade/rise timing, same
+  // FLIP-animated hint, same "button appears once done" gating. Page 2
+  // itself is untouched above; this just reproduces its exact logic.
+  function createStoryScreen(lines, linesEl, tapHint, forwardBtn){
+    let index = 0;
+
+    function reveal(){
+      if (index >= lines.length) return;
+
+      const beforeRect = tapHint.getBoundingClientRect();
+
+      const p = document.createElement('p');
+      p.className = 'story-line';
+      p.innerHTML = lines[index];
+      linesEl.appendChild(p);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => p.classList.add('is-shown'));
+      });
+      index++;
+
+      const afterRect = tapHint.getBoundingClientRect();
+      const deltaY = beforeRect.top - afterRect.top;
+      if (deltaY !== 0){
+        tapHint.style.transition = 'none';
+        tapHint.style.transform = `translateY(${deltaY}px)`;
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            tapHint.style.transition = 'transform 1s cubic-bezier(0.22, 1, 0.36, 1)';
+            tapHint.style.transform = 'translateY(0)';
+          });
+        });
+      }
+
+      if (index >= lines.length){
+        tapHint.classList.add('is-hidden');
+        setTimeout(() => {
+          forwardBtn.classList.add('is-visible');
+        }, 1000);
+      }
+    }
+
+    function start(){
+      if (index === 0) reveal();
+    }
+
+    function reset(){
+      index = 0;
+      linesEl.innerHTML = '';
+      tapHint.classList.remove('is-hidden');
+      tapHint.style.transition = '';
+      tapHint.style.transform = '';
+      forwardBtn.classList.remove('is-visible');
+    }
+
+    return { reveal, start, reset };
+  }
+
+  const story3 = createStoryScreen(
+    [
+      "you make me feel as if im floating",
+      "when we have nothing, you still love me",
+      "when it feels like we have everything, you still love me",
+      "i feel safe in your arms",
+      "i feel like you are the answer to all my prayers, all of them",
+      `ive never seen a more perfect girl than you my love <svg class="story-heart" viewBox="0 0 64 64"><use href="#s-heart"/></svg>`
+    ],
+    document.getElementById('story-lines-3'),
+    document.getElementById('tap-hint-3'),
+    document.getElementById('forward-btn-3')
+  );
+
+  const story4 = createStoryScreen(
+    [
+      "we've fought and argued before",
+      "we've disagreed on some things",
+      "and i admit i've made a lot of mistakes",
+      "but we found our way back to each other no matter what",
+      "and to me, that means the world to me",
+      "because even if something happens, i know we still love each other",
+      `it means more than you could imagine when i feel secure with you <svg class="story-heart" viewBox="0 0 64 64"><use href="#s-heart"/></svg>`
+    ],
+    document.getElementById('story-lines-4'),
+    document.getElementById('tap-hint-4'),
+    document.getElementById('forward-btn-4')
+  );
+
+  const story5 = createStoryScreen(
+    [
+      "you're so pretty, i remember when you sent me that first photo of you",
+      "you're absolutely stunning and i could write about you for years to come",
+      "i could make so many beautiful things like this for you",
+      "i could buy so many beautiful things for you",
+      "anything that makes you feel so pretty it's yours from now on",
+      `when you're with me my princess, you'll feel like a princess, i swear on it <svg class="story-heart" viewBox="0 0 64 64"><use href="#s-heart"/></svg>`
+    ],
+    document.getElementById('story-lines-5'),
+    document.getElementById('tap-hint-5'),
+    document.getElementById('forward-btn-5')
+  );
+
+  const story6 = createStoryScreen(
+    [
+      "my favorite part of you? everything",
+      "but if i had to choose, it would be your eyes",
+      "your eyes are so.. i don't even have a way to describe it they're mesmerising",
+      "i catch myself looking and longing to gaze into you and become lost all day and all night long",
+      "i catch myself admiring your photos all throughout the night",
+      "throughout the day i kiss my wallet, i look at your photos and i think",
+      `"what a beautiful girl i've been blessed with" <svg class="story-heart" viewBox="0 0 64 64"><use href="#s-heart"/></svg>`
+    ],
+    document.getElementById('story-lines-6'),
+    document.getElementById('tap-hint-6'),
+    document.getElementById('forward-btn-6')
+  );
+
+  const story7 = createStoryScreen(
+    [
+      "this year, we talked, we grew together, we helped each other, loved each other",
+      "and i hope this coming year, our second year together, will be filled with more joy than this",
+      "i hope we get to be with each other, just us two, enjoying each other's presence",
+      "because your presence means more than you could ever imagine to me",
+      "you're my safe space, my heaven, my everything, my angel, my princess, my one and only, my dena",
+      "you mean everything to me, the most beautiful and gorgeous and elegant girl in the world",
+      `it can only be you my beautiful princess <svg class="story-heart" viewBox="0 0 64 64"><use href="#s-heart"/></svg>`
+    ],
+    document.getElementById('story-lines-7'),
+    document.getElementById('tap-hint-7'),
+    document.getElementById('forward-btn-7')
+  );
+
+  // ---- Forward button (page 1 -> page 2 story screen, i.e. placeholder) ----
   const forwardBtn = document.getElementById('forward-btn');
-  const placeholderScreen = document.getElementById('placeholder-screen');
   const screenReveal = document.getElementById('screen-reveal');
+
+  // The ordered chain of tap-to-reveal screens between page 2 and the
+  // letterbox reveal. Each entry knows its own DOM element and story
+  // controller; wiring a forward/back button just needs the entry before
+  // and after it in this array.
+  const storyScreens = [
+    { el: document.getElementById('placeholder-screen'), story: story3, back: document.getElementById('back-btn-3'), forward: document.getElementById('forward-btn-3'), pageIndex: 2 },
+    { el: document.getElementById('screen-4'), story: story4, back: document.getElementById('back-btn-4'), forward: document.getElementById('forward-btn-4'), pageIndex: 3 },
+    { el: document.getElementById('screen-5'), story: story5, back: document.getElementById('back-btn-5'), forward: document.getElementById('forward-btn-5'), pageIndex: 4 },
+    { el: document.getElementById('screen-6'), story: story6, back: document.getElementById('back-btn-6'), forward: document.getElementById('forward-btn-6'), pageIndex: 5 },
+    { el: document.getElementById('screen-7'), story: story7, back: document.getElementById('back-btn-7'), forward: document.getElementById('forward-btn-7'), pageIndex: 6 }
+  ];
+
   forwardBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     document.body.classList.add('showing-reveal');
-    placeholderScreen.classList.add('is-active');
-    currentPageIndex = 2;
+    storyScreens[0].el.classList.add('is-active');
+    currentPageIndex = storyScreens[0].pageIndex;
     updateDots();
-    startStory3();
+    storyScreens[0].story.start();
   });
 
-  // Tapping anywhere on the placeholder screen (except its buttons)
-  // reveals the next story line, same as page 2.
-  placeholderScreen.addEventListener('click', (e) => {
-    if (e.target.closest('#forward-btn-3') || e.target.closest('#back-btn-3')) return;
-    revealNextStoryLine3();
+  storyScreens.forEach((screen, i) => {
+    // Tapping anywhere on this screen (except its buttons) reveals the
+    // next line, exactly like page 2.
+    screen.el.addEventListener('click', (e) => {
+      if (e.target.closest('#' + screen.forward.id) || e.target.closest('#' + screen.back.id)) return;
+      screen.story.reveal();
+    });
+
+    // Forward: move to the next screen in the chain, or on to the
+    // letterbox reveal if this is the last one.
+    screen.forward.addEventListener('click', (e) => {
+      e.stopPropagation();
+      screen.el.classList.remove('is-active');
+      const next = storyScreens[i + 1];
+      if (next){
+        next.el.classList.add('is-active');
+        currentPageIndex = next.pageIndex;
+        updateDots();
+        next.story.start();
+      } else {
+        screenReveal.classList.add('is-active');
+        currentPageIndex = 7;
+        updateDots();
+      }
+    });
+
+    // Back: return to the previous screen in the chain, or all the way
+    // out to page 1 (next-screen) if this is the first one.
+    screen.back.addEventListener('click', (e) => {
+      e.stopPropagation();
+      screen.el.classList.remove('is-active');
+      const prev = storyScreens[i - 1];
+      if (prev){
+        currentPageIndex = prev.pageIndex;
+        updateDots();
+        screen.story.reset();
+      } else {
+        document.body.classList.remove('showing-reveal');
+        currentPageIndex = 1;
+        updateDots();
+        screen.story.reset();
+      }
+    });
   });
 
-  // ---- Placeholder forward button (page 2 -> page 3) ----
-  // Swaps the placeholder out for the letterbox/reveal screen.
-  const forwardBtn3 = document.getElementById('forward-btn-3');
-  forwardBtn3.addEventListener('click', (e) => {
-    e.stopPropagation();
-    placeholderScreen.classList.remove('is-active');
-    screenReveal.classList.add('is-active');
-    currentPageIndex = 3;
-    updateDots();
-  });
-
-  // ---- Placeholder back button (page 2 -> page 1) ----
-  const backBtn3 = document.getElementById('back-btn-3');
-  backBtn3.addEventListener('click', (e) => {
-    e.stopPropagation();
-    document.body.classList.remove('showing-reveal');
-    placeholderScreen.classList.remove('is-active');
-    currentPageIndex = 1;
-    updateDots();
-    resetStory3();
-  });
-
-  // ---- Reveal button (page 3 -> page 4) ----
+  // ---- Reveal button (page 7's screen -> Discord) ----
   // Slides the letterbox bars away and fades in the Discord invite that
   // was sitting underneath them the whole time.
   const revealBtn = document.getElementById('reveal-btn');
   revealBtn.addEventListener('click', () => {
     screenReveal.classList.add('revealed');
-    currentPageIndex = 4;
+    currentPageIndex = 8;
     updateDots();
   });
 
-  // ---- Second back button (page 3/4 -> page 2) ----
-  // Hides the reveal screen and brings the placeholder screen back, then
+  // ---- Second back button (letterbox/discord -> page 7's screen) ----
+  // Hides the reveal screen and brings the last story screen back, then
   // once it's fully faded out, resets the reveal screen to its locked
   // state so she can open it again from the top.
   const backBtn2 = document.getElementById('back-btn-2');
+  const lastStoryScreen = storyScreens[storyScreens.length - 1];
   backBtn2.addEventListener('click', () => {
     screenReveal.classList.remove('is-active');
-    placeholderScreen.classList.add('is-active');
-    currentPageIndex = 2;
+    lastStoryScreen.el.classList.add('is-active');
+    currentPageIndex = lastStoryScreen.pageIndex;
     updateDots();
     setTimeout(() => {
       screenReveal.classList.remove('revealed');
