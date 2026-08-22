@@ -6,6 +6,7 @@
   const bgLayer = document.getElementById('bg-layer');
   const flowerLayer = document.getElementById('flower-layer');
   const nextScreenParallax = document.getElementById('next-screen-parallax');
+  const placeholderParallax = document.getElementById('placeholder-parallax');
   const isDesktop = window.matchMedia('(pointer: fine)').matches;
 
   if (isDesktop) {
@@ -26,6 +27,8 @@
       bgLayer.style.transform = `translate(${xFraction * maxDriftBg}px, ${yFraction * maxDriftBg}px)`;
       nextScreenParallax.style.setProperty('--parallax-x', `${xFraction * maxDriftText}px`);
       nextScreenParallax.style.setProperty('--parallax-y', `${yFraction * maxDriftText}px`);
+      placeholderParallax.style.setProperty('--parallax-x', `${xFraction * maxDriftText}px`);
+      placeholderParallax.style.setProperty('--parallax-y', `${yFraction * maxDriftText}px`);
     });
   } else {
     // ---- Tilt parallax, phones only ----
@@ -48,6 +51,8 @@
       bgLayer.style.transform = `translate(${xFraction * maxDriftBg}px, ${yFraction * maxDriftBg}px)`;
       nextScreenParallax.style.setProperty('--parallax-x', `${xFraction * maxDriftText}px`);
       nextScreenParallax.style.setProperty('--parallax-y', `${yFraction * maxDriftText}px`);
+      placeholderParallax.style.setProperty('--parallax-x', `${xFraction * maxDriftText}px`);
+      placeholderParallax.style.setProperty('--parallax-y', `${yFraction * maxDriftText}px`);
     }
 
 
