@@ -1479,3 +1479,57 @@
     .env-flap{ transition:none; }
     .tulip-reveal{ transition:none; }
   }
+
+  /* ---- Entry overlay ----
+     Sits above literally everything (higher z-index than the .screen
+     layers) so nothing underneath is reachable until she taps in.
+     backdrop-filter blurs whatever's rendered behind it — the envelope
+     scene — without needing a separate blurred copy of anything. */
+  #entry-overlay{
+    position:fixed;
+    inset:0;
+    z-index:1000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(255,255,255,0.5);
+    -webkit-backdrop-filter:blur(18px);
+    backdrop-filter:blur(18px);
+    transition: opacity 0.8s ease, visibility 0s linear 0.8s;
+  }
+  #entry-overlay.entered{
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+  }
+  #entry-btn{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:14px;
+    background:none;
+    border:none;
+    cursor:pointer;
+    padding:20px 28px;
+    font-family:'Comfortaa', 'Baloo 2', sans-serif;
+    font-weight:600;
+    font-size:1.05rem;
+    letter-spacing:0.04em;
+    text-transform:lowercase;
+    color:var(--ink);
+    animation: entryPulse 1.8s ease-in-out infinite;
+  }
+  #entry-btn .entry-heart{
+    width:40px;
+    height:40px;
+    fill:var(--pink);
+    filter: drop-shadow(0 2px 6px rgba(230,120,160,0.4));
+  }
+  @keyframes entryPulse{
+    0%, 100%{ transform:scale(1); opacity:0.85; }
+    50%{ transform:scale(1.06); opacity:1; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    #entry-overlay{ transition:none; }
+    #entry-btn{ animation:none; }
+  }
