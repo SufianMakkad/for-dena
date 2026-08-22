@@ -1,4 +1,20 @@
 
+  // ---- Entry overlay ----
+  // Tapping this button is a real, direct user gesture, so it's used to
+  // start the music with total certainty — no autoplay-policy guessing —
+  // in the same click that fades the blur away. fadeInMusic() is defined
+  // further down but hoisted (function declaration), so it's safe to call
+  // from here.
+  const entryOverlay = document.getElementById('entry-overlay');
+  const entryBtn = document.getElementById('entry-btn');
+  if (entryBtn && entryOverlay){
+    entryBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      fadeInMusic();
+      entryOverlay.classList.add('entered');
+    }, { once: true });
+  }
+
   // ---- Mouse parallax, desktop only ----
   // matchMedia('(pointer: fine)') is true on devices with a mouse/trackpad,
   // false on touch-only devices. This is how we make it PC-only.
@@ -952,18 +968,29 @@
     // had even rejected, leaving no listener left to retry with.
     if (hasStartedMusic) return;
     if (!music.src){ loadSong(0, false); }
+
+    // Start genuinely muted — this is the one autoplay mode almost every
+    // browser allows with zero user interaction (unlike volume=0, which
+    // browsers do NOT treat as "muted" for autoplay purposes). The moment
+    // playback actually begins, we flip muted off and fade the real
+    // volume in, so it goes straight from silent-but-playing to audible
+    // without needing a click.
+    music.muted = true;
     music.volume = 0;
     const playPromise = music.play();
+
+    function unmuteAndFadeIn(){
+      hasStartedMusic = true;
+      music.muted = false;
+      fadeVolume(currentVolume, FADE_IN_MS);
+    }
+
     if (playPromise && typeof playPromise.then === 'function'){
-      playPromise.then(() => {
-        hasStartedMusic = true;
-        fadeVolume(currentVolume, FADE_IN_MS);
-      }).catch(() => {
-        // Blocked — a later gesture will call fadeInMusic again and retry.
+      playPromise.then(unmuteAndFadeIn).catch(() => {
+        // Blocked even muted — very rare, but a later gesture will retry.
       });
     } else {
-      hasStartedMusic = true;
-      fadeVolume(currentVolume, FADE_IN_MS);
+      unmuteAndFadeIn();
     }
   }
 
