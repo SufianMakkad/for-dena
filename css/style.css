@@ -454,6 +454,15 @@
     outline-offset:6px;
     border-radius:10px;
   }
+  #placeholder-screen{
+    align-items:flex-start;
+    justify-content:center;
+    padding-top:16vh;
+    padding-bottom:calc(40px + env(safe-area-inset-bottom, 0px));
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    box-sizing:border-box;
+  }
   #placeholder-parallax{
     display:flex;
     flex-direction:column;
