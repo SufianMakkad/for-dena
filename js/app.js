@@ -150,6 +150,25 @@
     }, CLOSE_ANIM_MS);
   });
 
+  // ---- Auto-scroll as story text grows ----
+  // Each story screen scrolls internally (overflow-y:auto) once its
+  // content grows taller than the viewport. Rather than making her
+  // scroll manually to see the newest line or the "keep going" button,
+  // this eases the container's scroll position up just enough to bring
+  // a given anchor element (the tap hint, or the forward button once
+  // revealed) comfortably into view.
+  function easeAnchorIntoView(container, anchorEl){
+    requestAnimationFrame(() => {
+      const containerRect = container.getBoundingClientRect();
+      const anchorRect = anchorEl.getBoundingClientRect();
+      const bottomMargin = 28; // breathing room below the anchor
+      const overflow = anchorRect.bottom - (containerRect.bottom - bottomMargin);
+      if (overflow > 0){
+        container.scrollTo({ top: container.scrollTop + overflow, behavior: 'smooth' });
+      }
+    });
+  }
+
   // ---- Tap-to-reveal story text (slide 2) ----
   // Lines are revealed one at a time on tap, each fading/rising into
   // place. Once the last line is shown, the "tap to continue" hint fades
@@ -198,11 +217,13 @@
         });
       });
     }
+    easeAnchorIntoView(nextScreenEl, tapHint);
 
     if (storyIndex >= storyLines.length){
       tapHint.classList.add('is-hidden');
       setTimeout(() => {
         forwardBtn.classList.add('is-visible');
+        easeAnchorIntoView(nextScreenEl, forwardBtn);
       }, 1000);
     }
   }
@@ -383,7 +404,7 @@
   // is guaranteed to behave identically — same fade/rise timing, same
   // FLIP-animated hint, same "button appears once done" gating. Page 2
   // itself is untouched above; this just reproduces its exact logic.
-  function createStoryScreen(lines, linesEl, tapHint, forwardBtn){
+  function createStoryScreen(lines, linesEl, tapHint, forwardBtn, container){
     let index = 0;
 
     function reveal(){
@@ -412,11 +433,13 @@
           });
         });
       }
+      easeAnchorIntoView(container, tapHint);
 
       if (index >= lines.length){
         tapHint.classList.add('is-hidden');
         setTimeout(() => {
           forwardBtn.classList.add('is-visible');
+          easeAnchorIntoView(container, forwardBtn);
         }, 1000);
       }
     }
@@ -448,7 +471,8 @@
     ],
     document.getElementById('story-lines-3'),
     document.getElementById('tap-hint-3'),
-    document.getElementById('forward-btn-3')
+    document.getElementById('forward-btn-3'),
+    document.getElementById('placeholder-screen')
   );
 
   const story4 = createStoryScreen(
@@ -463,7 +487,8 @@
     ],
     document.getElementById('story-lines-4'),
     document.getElementById('tap-hint-4'),
-    document.getElementById('forward-btn-4')
+    document.getElementById('forward-btn-4'),
+    document.getElementById('screen-4')
   );
 
   const story5 = createStoryScreen(
@@ -477,7 +502,8 @@
     ],
     document.getElementById('story-lines-5'),
     document.getElementById('tap-hint-5'),
-    document.getElementById('forward-btn-5')
+    document.getElementById('forward-btn-5'),
+    document.getElementById('screen-5')
   );
 
   const story6 = createStoryScreen(
@@ -492,7 +518,8 @@
     ],
     document.getElementById('story-lines-6'),
     document.getElementById('tap-hint-6'),
-    document.getElementById('forward-btn-6')
+    document.getElementById('forward-btn-6'),
+    document.getElementById('screen-6')
   );
 
   const story7 = createStoryScreen(
@@ -507,7 +534,8 @@
     ],
     document.getElementById('story-lines-7'),
     document.getElementById('tap-hint-7'),
-    document.getElementById('forward-btn-7')
+    document.getElementById('forward-btn-7'),
+    document.getElementById('screen-7')
   );
 
   // ---- Forward button (page 1 -> page 2 story screen, i.e. placeholder) ----
@@ -568,6 +596,7 @@
       screen.el.classList.remove('is-active');
       const prev = storyScreens[i - 1];
       if (prev){
+        prev.el.classList.add('is-active');
         currentPageIndex = prev.pageIndex;
         updateDots();
         screen.story.reset();
