@@ -497,19 +497,21 @@
         const p = music.play();
         const goIn = () => fadeVolume(currentVolume, SWITCH_FADE_IN_MS);
         if (p && typeof p.then === 'function'){
-          p.then(goIn).catch(() => {});
+          p.then(goIn).catch(() => {
+            // Blocked by autoplay rules — let the next tap on play/pause retry it.
+            attemptedMusic = false;
+          });
         } else {
           goIn();
         }
       }
     }
 
-    if (opts.userInitiated && wasPlaying){
-      // Fade the current track out gently before switching tracks.
-      fadeVolume(0, SWITCH_FADE_OUT_MS, swapAndPlay);
-    } else {
-      swapAndPlay();
-    }
+    // Play immediately, in the same tick as the click/tap, so strict
+    // autoplay policies (iOS Safari) still count this as tied to her
+    // gesture. We still get a soft fade-in on the new track — we just
+    // don't wait for the old one to fade out first anymore.
+    swapAndPlay();
   }
 
   // Formats seconds as m:ss (e.g. 75 -> "1:15"), matching how she'd see
