@@ -92,7 +92,7 @@
   // TOTAL_PAGES + currentPageIndex track where she is in the journey.
   // Bump TOTAL_PAGES (and add a matching .dot in the HTML) each time a
   // new page is added.
-  const TOTAL_PAGES = 9; // envelope (0) + next-screen (1) + placeholder (2) + screen-4..7 (3-6) + letterbox reveal (7) + discord (8)
+  const TOTAL_PAGES = 9; // envelope (0) + next-screen (1) + placeholder/3 (2) + screen-6/7/4/5 in that order (3-6) + letterbox reveal (7) + discord (8)
   let currentPageIndex = 0;
 
   function updateDots(){
@@ -520,10 +520,10 @@
   // and after it in this array.
   const storyScreens = [
     { el: document.getElementById('placeholder-screen'), story: story3, back: document.getElementById('back-btn-3'), forward: document.getElementById('forward-btn-3'), pageIndex: 2 },
-    { el: document.getElementById('screen-4'), story: story4, back: document.getElementById('back-btn-4'), forward: document.getElementById('forward-btn-4'), pageIndex: 3 },
-    { el: document.getElementById('screen-5'), story: story5, back: document.getElementById('back-btn-5'), forward: document.getElementById('forward-btn-5'), pageIndex: 4 },
-    { el: document.getElementById('screen-6'), story: story6, back: document.getElementById('back-btn-6'), forward: document.getElementById('forward-btn-6'), pageIndex: 5 },
-    { el: document.getElementById('screen-7'), story: story7, back: document.getElementById('back-btn-7'), forward: document.getElementById('forward-btn-7'), pageIndex: 6 }
+    { el: document.getElementById('screen-6'), story: story6, back: document.getElementById('back-btn-6'), forward: document.getElementById('forward-btn-6'), pageIndex: 3 },
+    { el: document.getElementById('screen-7'), story: story7, back: document.getElementById('back-btn-7'), forward: document.getElementById('forward-btn-7'), pageIndex: 4 },
+    { el: document.getElementById('screen-4'), story: story4, back: document.getElementById('back-btn-4'), forward: document.getElementById('forward-btn-4'), pageIndex: 5 },
+    { el: document.getElementById('screen-5'), story: story5, back: document.getElementById('back-btn-5'), forward: document.getElementById('forward-btn-5'), pageIndex: 6 }
   ];
 
   forwardBtn.addEventListener('click', (e) => {
@@ -854,8 +854,11 @@
   });
 
   function fadeInMusic(){
-    if (attemptedMusic) return;
-    attemptedMusic = true;
+    // Guard on whether music has actually started, not just been
+    // attempted — attemptedMusic used to get set synchronously and could
+    // swallow the very next gesture before the blocked play() promise
+    // had even rejected, leaving no listener left to retry with.
+    if (hasStartedMusic) return;
     if (!music.src){ loadSong(0, false); }
     music.volume = 0;
     const playPromise = music.play();
@@ -864,8 +867,7 @@
         hasStartedMusic = true;
         fadeVolume(currentVolume, FADE_IN_MS);
       }).catch(() => {
-        // Blocked — allow the next distinct gesture to retry.
-        attemptedMusic = false;
+        // Blocked — a later gesture will call fadeInMusic again and retry.
       });
     } else {
       hasStartedMusic = true;
@@ -897,8 +899,19 @@
   // Several different gesture types, since browsers vary in which ones
   // count as a valid "user activation" for unlocking audio (Safari/iOS in
   // particular is stricter than Chrome about pointerdown vs click/touchend).
+  // Not { once: true } — fadeInMusic can no-op on a given gesture if a
+  // still-pending play() attempt hasn't resolved yet, so we keep retrying
+  // on every gesture until playback actually succeeds, then detach.
+  function unlockMusicOnGesture(){
+    fadeInMusic();
+    if (hasStartedMusic){
+      ['click', 'touchend', 'pointerdown', 'keydown'].forEach((evt) => {
+        document.removeEventListener(evt, unlockMusicOnGesture);
+      });
+    }
+  }
   ['click', 'touchend', 'pointerdown', 'keydown'].forEach((evt) => {
-    document.addEventListener(evt, fadeInMusic, { once: true, passive: true });
+    document.addEventListener(evt, unlockMusicOnGesture, { passive: true });
   });
 
   // ---- Volume slider ----
