@@ -614,14 +614,17 @@
     text-align:center;
     padding:0 32px;
     z-index:1;
-    opacity:0;
-    transition: opacity 0.7s ease 0.35s;
   }
-  #screen-reveal.revealed .discord-content{ opacity:1; }
   .discord-title{
     font-family:'Caveat Brush','Baloo 2',sans-serif;
     font-size:2rem;
-    color:#D6699A;
+    color:var(--pink);
+    opacity:0;
+    transition: opacity 1.6s ease;
+  }
+  #screen-reveal.revealed .discord-title{
+    opacity:1;
+    transition-delay: 2.4s; /* right as the letterbox bars finish sliding out */
   }
   .discord-sub{
     font-size:1rem;
@@ -635,33 +638,47 @@
     margin-top:6px;
     padding:14px 26px;
     border-radius:999px;
-    background:#E487B0;
+    background:var(--pink);
     color:#FFFFFF;
     text-decoration:none;
-    font-family:'Baloo 2', sans-serif;
-    font-weight:600;
-    font-size:1.05rem;
-    box-shadow: 0 14px 30px -12px rgba(228,135,176,0.55);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    font-family:'Caveat Brush','Baloo 2',sans-serif;
+    font-weight:400;
+    font-size:1.3rem;
+    text-transform:lowercase;
+    box-shadow: 0 14px 30px -12px rgba(242,166,198,0.55);
+    opacity:0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 1.6s ease;
+  }
+  #screen-reveal.revealed .discord-btn{
+    opacity:1;
+    transition-delay: 0s, 0s, 2.4s; /* only the opacity fade is delayed to match the title */
   }
   .discord-btn:hover{
     transform: translateY(-2px) scale(1.03);
-    box-shadow: 0 18px 34px -12px rgba(228,135,176,0.65);
+    box-shadow: 0 18px 34px -12px rgba(242,166,198,0.65);
   }
   .discord-btn svg{ width:22px; height:22px; fill:#FFFFFF; }
 
+  /* Letterbox bars: start fully retracted off-screen (not visible at all),
+     slide in to cover the top/bottom 14% over 2.5s once this screen
+     becomes active, and slide back out over the same 2.5s when revealed.
+     pointer-events:none because these are purely decorative — they used
+     to sit in a higher stacking layer than #reveal-btn and could
+     intercept its hover/click hit-testing right at the button's edges,
+     which is what caused the stray-fill/cursor bug. */
   .letterbox{
     position:absolute;
     left:0;
     right:0;
     background:#C9628F; /* slightly dark pink */
     z-index:3;
-    transition: transform 0.9s cubic-bezier(.65,0,.35,1);
+    pointer-events:none;
+    transition: transform 2.5s cubic-bezier(.65,0,.35,1);
   }
-  .letterbox-top{ top:0; height:14%; }
-  .letterbox-bottom{ bottom:0; height:14%; }
-  #screen-reveal.revealed .letterbox-top{ transform: translateY(-100%); }
-  #screen-reveal.revealed .letterbox-bottom{ transform: translateY(100%); }
+  .letterbox-top{ top:0; height:14%; transform: translateY(-100%); }
+  .letterbox-bottom{ bottom:0; height:14%; transform: translateY(100%); }
+  #screen-reveal.is-active:not(.revealed) .letterbox-top{ transform: translateY(0); }
+  #screen-reveal.is-active:not(.revealed) .letterbox-bottom{ transform: translateY(0); }
 
   .reveal-message{
     position:absolute;
@@ -669,7 +686,7 @@
     bottom:14%;
     left:0;
     right:0;
-    z-index:2;
+    z-index:4;
     display:flex;
     flex-direction:column;
     align-items:center;
@@ -688,8 +705,14 @@
     font-family:'Caveat Brush','Baloo 2',sans-serif;
     font-size:1.6rem;
     line-height:1.3;
-    color:var(--ink);
+    color:#D6699A;
     max-width:300px;
+    opacity:0;
+    transition: opacity 1.6s ease;
+  }
+  #screen-reveal.is-active:not(.revealed) .reveal-message p{
+    opacity:1;
+    transition-delay: 2.5s; /* right as the letterbox bars finish closing */
   }
   #reveal-btn{
     position:relative;
@@ -702,7 +725,14 @@
     display:flex;
     align-items:center;
     justify-content:center;
-    transition: transform 0.2s ease;
+    opacity:0;
+    transform: translateY(6px);
+    transition: transform 0.2s ease, opacity 0.6s ease;
+  }
+  #screen-reveal.is-active:not(.revealed) #reveal-btn{
+    opacity:1;
+    transform: translateY(0);
+    transition-delay: 3.5s; /* appears shortly after the text starts fading in */
   }
   #reveal-btn:hover{
     transform: translateY(-2px) rotate(1deg);
