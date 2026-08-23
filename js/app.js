@@ -234,7 +234,9 @@
   // Short stories that never fill the screen never move at all.
   function easeAnchorIntoView(container, trackEl, anchorRect){
     const containerRect = container.getBoundingClientRect();
-    const bottomMargin = 28; // breathing room below the anchor
+    // 72px clears the page-indicator dots (bottom:20px + up to 16px tall,
+    // plus breathing room) so "keep going" never lands on top of them.
+    const bottomMargin = 72;
     const overflow = anchorRect.bottom - (containerRect.bottom - bottomMargin);
     if (overflow > 0){
       const currentOffset = parseFloat(trackEl.dataset.trackOffset || '0');
