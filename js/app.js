@@ -197,37 +197,48 @@
     return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   }
 
-  function animateScrollTo(container, targetTop){
-    const startTop = container.scrollTop;
-    const distance = targetTop - startTop;
+  // Animates a story-track element's translateY offset (never real
+  // scrolling — the outer screen is overflow:hidden, so no scrollbar can
+  // ever appear). trackEl.dataset.trackOffset holds the current push-up
+  // amount in px so repeated calls stack correctly instead of resetting.
+  function animateTrackTo(trackEl, targetOffset){
+    const startOffset = parseFloat(trackEl.dataset.trackOffset || '0');
+    const distance = targetOffset - startOffset;
     if (Math.abs(distance) < 1) return;
 
-    // Cancel any in-flight scroll animation on this container so rapid
-    // taps don't fight each other and cause jitter.
-    if (container._scrollAnimFrame){
-      cancelAnimationFrame(container._scrollAnimFrame);
+    // Cancel any in-flight push-up on this track so rapid taps don't
+    // fight each other and cause jitter.
+    if (trackEl._scrollAnimFrame){
+      cancelAnimationFrame(trackEl._scrollAnimFrame);
     }
 
     const startTime = performance.now();
     function step(now){
       const elapsed = now - startTime;
       const t = Math.min(1, elapsed / SCROLL_EASE_MS);
-      container.scrollTop = startTop + distance * easeInOutCubic(t);
+      const offset = startOffset + distance * easeInOutCubic(t);
+      trackEl.dataset.trackOffset = String(offset);
+      trackEl.style.transform = `translateY(${-offset}px)`;
       if (t < 1){
-        container._scrollAnimFrame = requestAnimationFrame(step);
+        trackEl._scrollAnimFrame = requestAnimationFrame(step);
       } else {
-        container._scrollAnimFrame = null;
+        trackEl._scrollAnimFrame = null;
       }
     }
-    container._scrollAnimFrame = requestAnimationFrame(step);
+    trackEl._scrollAnimFrame = requestAnimationFrame(step);
   }
 
-  function easeAnchorIntoView(container, anchorRect){
+  // Only pushes the track up if the newly-revealed anchor (the tap hint,
+  // or the forward button once revealed) would otherwise sit below the
+  // container's visible bottom edge — i.e. only when actually needed.
+  // Short stories that never fill the screen never move at all.
+  function easeAnchorIntoView(container, trackEl, anchorRect){
     const containerRect = container.getBoundingClientRect();
     const bottomMargin = 28; // breathing room below the anchor
     const overflow = anchorRect.bottom - (containerRect.bottom - bottomMargin);
     if (overflow > 0){
-      animateScrollTo(container, container.scrollTop + overflow);
+      const currentOffset = parseFloat(trackEl.dataset.trackOffset || '0');
+      animateTrackTo(trackEl, currentOffset + overflow);
     }
   }
 
@@ -244,6 +255,7 @@
     'it made me feel so special, like the luckiest boy in the world <svg class="story-heart" viewBox="0 0 64 64"><use href="#s-heart"/></svg>'
   ];
   const storyLinesEl = document.getElementById('story-lines');
+  const storyTrackEl = document.getElementById('story-track');
   const tapHint = document.getElementById('tap-hint');
   const nextScreenInner = document.getElementById('next-screen-inner');
   let storyIndex = 0;
@@ -279,13 +291,13 @@
         });
       });
     }
-    easeAnchorIntoView(nextScreenEl, afterRect);
+    easeAnchorIntoView(nextScreenEl, storyTrackEl, afterRect);
 
     if (storyIndex >= storyLines.length){
       tapHint.classList.add('is-hidden');
       setTimeout(() => {
         forwardBtn.classList.add('is-visible');
-        easeAnchorIntoView(nextScreenEl, forwardBtn.getBoundingClientRect());
+        easeAnchorIntoView(nextScreenEl, storyTrackEl, forwardBtn.getBoundingClientRect());
       }, 1000);
     }
   }
@@ -396,6 +408,12 @@
     tapHint.style.transition = '';
     tapHint.style.transform = '';
     forwardBtn.classList.remove('is-visible');
+    if (storyTrackEl._scrollAnimFrame){
+      cancelAnimationFrame(storyTrackEl._scrollAnimFrame);
+      storyTrackEl._scrollAnimFrame = null;
+    }
+    storyTrackEl.dataset.trackOffset = '0';
+    storyTrackEl.style.transform = '';
   }
 
   // ---- Tap-to-reveal story text (page 3 / placeholder screen) ----
@@ -466,7 +484,7 @@
   // is guaranteed to behave identically — same fade/rise timing, same
   // FLIP-animated hint, same "button appears once done" gating. Page 2
   // itself is untouched above; this just reproduces its exact logic.
-  function createStoryScreen(lines, linesEl, tapHint, forwardBtn, container){
+  function createStoryScreen(lines, linesEl, tapHint, forwardBtn, container, trackEl){
     let index = 0;
 
     function reveal(){
@@ -495,13 +513,13 @@
           });
         });
       }
-      easeAnchorIntoView(container, afterRect);
+      easeAnchorIntoView(container, trackEl, afterRect);
 
       if (index >= lines.length){
         tapHint.classList.add('is-hidden');
         setTimeout(() => {
           forwardBtn.classList.add('is-visible');
-          easeAnchorIntoView(container, forwardBtn.getBoundingClientRect());
+          easeAnchorIntoView(container, trackEl, forwardBtn.getBoundingClientRect());
         }, 1000);
       }
     }
@@ -517,6 +535,12 @@
       tapHint.style.transition = '';
       tapHint.style.transform = '';
       forwardBtn.classList.remove('is-visible');
+      if (trackEl._scrollAnimFrame){
+        cancelAnimationFrame(trackEl._scrollAnimFrame);
+        trackEl._scrollAnimFrame = null;
+      }
+      trackEl.dataset.trackOffset = '0';
+      trackEl.style.transform = '';
     }
 
     return { reveal, start, reset };
@@ -534,7 +558,8 @@
     document.getElementById('story-lines-3'),
     document.getElementById('tap-hint-3'),
     document.getElementById('forward-btn-3'),
-    document.getElementById('placeholder-screen')
+    document.getElementById('placeholder-screen'),
+    document.getElementById('story-track-3')
   );
 
   const story4 = createStoryScreen(
@@ -550,7 +575,8 @@
     document.getElementById('story-lines-4'),
     document.getElementById('tap-hint-4'),
     document.getElementById('forward-btn-4'),
-    document.getElementById('screen-4')
+    document.getElementById('screen-4'),
+    document.getElementById('story-track-4')
   );
 
   const story5 = createStoryScreen(
@@ -565,7 +591,8 @@
     document.getElementById('story-lines-5'),
     document.getElementById('tap-hint-5'),
     document.getElementById('forward-btn-5'),
-    document.getElementById('screen-5')
+    document.getElementById('screen-5'),
+    document.getElementById('story-track-5')
   );
 
   const story6 = createStoryScreen(
@@ -581,7 +608,8 @@
     document.getElementById('story-lines-6'),
     document.getElementById('tap-hint-6'),
     document.getElementById('forward-btn-6'),
-    document.getElementById('screen-6')
+    document.getElementById('screen-6'),
+    document.getElementById('story-track-6')
   );
 
   const story7 = createStoryScreen(
@@ -597,7 +625,8 @@
     document.getElementById('story-lines-7'),
     document.getElementById('tap-hint-7'),
     document.getElementById('forward-btn-7'),
-    document.getElementById('screen-7')
+    document.getElementById('screen-7'),
+    document.getElementById('story-track-7')
   );
 
   const story8 = createStoryScreen(
@@ -613,7 +642,8 @@
     document.getElementById('story-lines-8'),
     document.getElementById('tap-hint-8'),
     document.getElementById('forward-btn-8'),
-    document.getElementById('screen-8')
+    document.getElementById('screen-8'),
+    document.getElementById('story-track-8')
   );
 
   // ---- Forward button (page 1 -> page 2 story screen, i.e. placeholder) ----
