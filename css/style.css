@@ -265,6 +265,10 @@
     box-sizing:border-box;
     -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 70px);
     mask-image: linear-gradient(to bottom, transparent 0, #000 70px);
+    pointer-events:none;
+  }
+  #forward-btn{
+    pointer-events:auto;
   }
   #next-screen-inner{
     text-align:center;
@@ -465,6 +469,15 @@
     box-sizing:border-box;
     -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 70px);
     mask-image: linear-gradient(to bottom, transparent 0, #000 70px);
+    /* Purely visual clip/fade layer — must never capture clicks or
+       hover, or it fights whatever sits behind/beside it (the back
+       button in particular) for cursor state, causing the pointer to
+       flicker between "clickable" and not. pointer-events:auto is
+       re-enabled on the buttons that actually live inside it below. */
+    pointer-events:none;
+  }
+  .story-forward-btn{
+    pointer-events:auto;
   }
   /* Wraps the growing story text + hint + button on every screen. JS
      translates this element upward (never the container's scrollTop —
