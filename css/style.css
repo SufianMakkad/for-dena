@@ -224,8 +224,6 @@
     display:flex;
     align-items:flex-start;
     justify-content:center;
-    padding-top:16vh;
-    padding-bottom:calc(40px + env(safe-area-inset-bottom, 0px));
     overflow:hidden;
     box-sizing:border-box;
     background:transparent;
@@ -233,11 +231,6 @@
     visibility:hidden;
     pointer-events:none;
     transition: opacity 0.6s ease;
-    /* Fades content out as it's pushed toward the very top of the
-       screen by the story-track push-up (see .story-track in app.js) —
-       reads like movie credits scrolling past rather than a hard cut. */
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 70px);
-    mask-image: linear-gradient(to bottom, transparent 0, #000 70px);
   }
   body.transitioning #next-screen{
     opacity:1;
@@ -259,6 +252,19 @@
     opacity:0;
     visibility:hidden;
     pointer-events:none;
+  }
+  #next-screen-clip{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding-top:16vh;
+    padding-bottom:calc(40px + env(safe-area-inset-bottom, 0px));
+    overflow:hidden;
+    box-sizing:border-box;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 70px);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 70px);
   }
   #next-screen-inner{
     text-align:center;
@@ -439,13 +445,24 @@
      + padding-top) exactly mirrors #next-screen (page 2) so lines never
      shift when new ones are appended — matches page 2 pixel for pixel. */
   .screen.story-screen{
+    overflow:hidden;
+    box-sizing:border-box;
+  }
+  /* Dedicated clip layer for the fade + push-up effect, separate from
+     the screen's own back button — back-btn is a sibling of this
+     element, not a descendant, so it never fades or moves regardless
+     of what the story-track inside does. Reproduces the centering/
+     padding the outer .screen used to do itself. */
+  .story-clip{
+    position:absolute;
+    inset:0;
+    display:flex;
     align-items:flex-start;
     justify-content:center;
     padding-top:16vh;
     padding-bottom:calc(40px + env(safe-area-inset-bottom, 0px));
     overflow:hidden;
     box-sizing:border-box;
-    /* Same credits-style top fade as page 2 — see .story-track. */
     -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 70px);
     mask-image: linear-gradient(to bottom, transparent 0, #000 70px);
   }
