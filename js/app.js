@@ -10,7 +10,7 @@
   if (entryBtn && entryOverlay){
     entryBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      fadeInMusic();
+      forceAudiblePlay();
       entryOverlay.classList.add('entered');
     }, { once: true });
   }
@@ -991,6 +991,34 @@
       });
     } else {
       unmuteAndFadeIn();
+    }
+  }
+
+  // Called directly from the entry button's click handler — a guaranteed
+  // real user gesture. On desktop, browsers sometimes let the page-load
+  // muted play() succeed but then silently block/undo the programmatic
+  // unmute that follows it (since that unmute isn't itself tied to a
+  // gesture), leaving hasStartedMusic set to true with no actual sound
+  // playing. fadeInMusic()'s early-return guard would then skip this
+  // click entirely. forceAudiblePlay() ignores that guard and restarts
+  // playback unmuted, directly inside the click, so sound is guaranteed.
+  function forceAudiblePlay(){
+    if (!music.src){ loadSong(0, false); }
+    music.muted = false;
+    music.volume = 0;
+    const playPromise = music.play();
+    function onPlaying(){
+      hasStartedMusic = true;
+      fadeVolume(currentVolume, FADE_IN_MS);
+    }
+    if (playPromise && typeof playPromise.then === 'function'){
+      playPromise.then(onPlaying).catch(() => {
+        // Still blocked somehow — fall back to the muted-first approach.
+        hasStartedMusic = false;
+        fadeInMusic();
+      });
+    } else {
+      onPlaying();
     }
   }
 
