@@ -226,14 +226,18 @@
     justify-content:center;
     padding-top:16vh;
     padding-bottom:calc(40px + env(safe-area-inset-bottom, 0px));
-    overflow-y:auto;
-    -webkit-overflow-scrolling:touch;
+    overflow:hidden;
     box-sizing:border-box;
     background:transparent;
     opacity:0;
     visibility:hidden;
     pointer-events:none;
     transition: opacity 0.6s ease;
+    /* Fades content out as it's pushed toward the very top of the
+       screen by the story-track push-up (see .story-track in app.js) —
+       reads like movie credits scrolling past rather than a hard cut. */
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 70px);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 70px);
   }
   body.transitioning #next-screen{
     opacity:1;
@@ -439,9 +443,25 @@
     justify-content:center;
     padding-top:16vh;
     padding-bottom:calc(40px + env(safe-area-inset-bottom, 0px));
-    overflow-y:auto;
-    -webkit-overflow-scrolling:touch;
+    overflow:hidden;
     box-sizing:border-box;
+    /* Same credits-style top fade as page 2 — see .story-track. */
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 70px);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 70px);
+  }
+  /* Wraps the growing story text + hint + button on every screen. JS
+     translates this element upward (never the container's scrollTop —
+     the container is overflow:hidden now, so no scrollbar ever appears)
+     only when the next revealed line would otherwise go past the
+     container's bottom edge. Combined with the mask-image fade above,
+     older lines drift up and fade out like movie credits, but only
+     when there genuinely isn't room for the new line — short stories
+     never move at all. */
+  .story-track{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    width:100%;
   }
   .story-back-btn{
     position:absolute;
