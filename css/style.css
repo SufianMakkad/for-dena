@@ -1604,7 +1604,6 @@
     height:34px;
     display:flex;
     align-items:center;
-    cursor:pointer;
     touch-action:none;
   }
   #player-expanded-track::before{
@@ -1640,9 +1639,18 @@
     border:3px solid #FFFFFF;
     box-shadow: 0 3px 8px -2px rgba(214,120,160,0.6);
     transform: translate(-50%, -50%);
-    pointer-events:none;
+    cursor:grab;
+    touch-action:none;
     transition: transform 0.15s ease;
   }
+  /* Invisible padding around the visible dot so it's easy to grab with a
+     thumb on a phone screen without the hit area looking oversized. */
+  #player-expanded-thumb::after{
+    content:"";
+    position:absolute;
+    inset:-14px;
+  }
+  #player-expanded-thumb:active{ cursor:grabbing; }
   #player-expanded-track:active #player-expanded-thumb,
   #player-expanded-track.dragging #player-expanded-thumb{
     transform: translate(-50%, -50%) scale(1.15);
@@ -1653,9 +1661,8 @@
     justify-content:center;
     gap:26px;
   }
-  #player-rewind-btn,
-  #player-forward-btn{
-    position:relative;
+  #player-prev-btn,
+  #player-next-btn{
     width:48px;
     height:48px;
     border-radius:50%;
@@ -1668,18 +1675,10 @@
     padding:0;
     transition: transform 0.2s ease, background 0.2s ease;
   }
-  #player-rewind-btn:hover,
-  #player-forward-btn:hover{ background: rgba(242,166,198,0.3); transform:scale(1.06); }
-  #player-rewind-btn svg,
-  #player-forward-btn svg{ width:24px; height:24px; }
-  #player-rewind-btn span,
-  #player-forward-btn span{
-    position:absolute;
-    font-family:'Baloo 2', sans-serif;
-    font-weight:700;
-    font-size:8.5px;
-    color:#D6699A;
-  }
+  #player-prev-btn:hover,
+  #player-next-btn:hover{ background: rgba(242,166,198,0.3); transform:scale(1.06); }
+  #player-prev-btn svg,
+  #player-next-btn svg{ width:22px; height:22px; }
   #player-expanded-play{
     width:62px;
     height:62px;
