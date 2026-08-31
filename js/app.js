@@ -795,12 +795,6 @@
   const iconSpin = soundToggle.querySelector('.icon-spin');
   const songHint = document.getElementById('song-hint');
   const skipHint = document.getElementById('skip-hint');
-  function dismissSkipHint(){
-    skipHint.classList.add('hidden');
-  }
-  ['click', 'touchstart', 'keydown'].forEach((evt) => {
-    document.addEventListener(evt, dismissSkipHint, { once: true, passive: true });
-  });
   const songLabel = document.getElementById('song-label');
   const songTitleText = document.getElementById('song-title-text');
   const titleInner = songTitleText.querySelector('.title-inner');
@@ -808,13 +802,18 @@
   const playPauseToggle = document.getElementById('play-pause-toggle');
   const songProgressRow = document.getElementById('song-progress-row');
   const songProgressTrack = document.getElementById('song-progress-track');
+  const songPickerWrap = document.getElementById('song-picker-wrap');
+  songPickerWrap.addEventListener('click', () => {
+    skipHint.classList.add('hidden');
+  }, { once: true });
   const songProgressFill = document.getElementById('song-progress-fill');
   const songTimeElapsed = document.getElementById('song-time-elapsed');
   const songTimeTotal = document.getElementById('song-time-total');
   const playerExpanded = document.getElementById('player-expanded');
   const playerExpandedBackdrop = document.getElementById('player-expanded-backdrop');
   const playerCollapseBtn = document.getElementById('player-collapse-btn');
-  const playerExpandedTitle = document.getElementById('player-expanded-title').querySelector('.title-inner');
+  const playerExpandedSong = document.getElementById('player-expanded-song');
+  const playerExpandedArtist = document.getElementById('player-expanded-artist');
   const playerExpandedTrack = document.getElementById('player-expanded-track');
   const playerExpandedFill = document.getElementById('player-expanded-fill');
   const playerExpandedThumb = document.getElementById('player-expanded-thumb');
@@ -879,7 +878,6 @@
       titleInner.classList.remove('fading');
       measureMarquee();
     }, TEXT_CROSSFADE_MS);
-    playerExpandedTitle.textContent = text;
   }
 
   // Only scroll titles that are actually too long to fit in the pill —
@@ -914,6 +912,8 @@
     const wasPlaying = hasStartedMusic && !music.paused && !music.ended;
 
     setSongLabelText(song.title + ' — ' + song.artist);
+    playerExpandedSong.textContent = song.title;
+    playerExpandedArtist.textContent = song.artist;
     renderSongMenu();
 
     function swapAndPlay(){
