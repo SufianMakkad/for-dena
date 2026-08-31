@@ -16,4 +16,10 @@ window.SONGS = [
   { title: "Apple Cider", artist: "beabadoobee", data: "assets/audio/Apple%20Cider.mp3" },
   { title: "Scott and Zelda", artist: "BIBI", data: "assets/audio/Scott%20and%20Zelda.mp3" },
   { title: "may you never forget me", artist: "Temachii", data: "assets/audio/may%20you%20never%20forget%20me.mp3" },
+  { title: "Crush", artist: "Ethel Cain", data: "assets/audio/Crush.mp3" },
+  { title: "DIE FOR ME", artist: "Chase Atlantic", data: "assets/audio/DIE%20%FOR%20ME.mp3" },
+  { title: "Espresso", artist: "Sabrina Carpenter", data: "assets/audio/Espresso.mp3" },
+  { title: "Puddles", artist: "Not For Radio", data: "assets/audio/Puddles.mp3" },
+  { title: "Valentine", artist: "Laufey", data: "assets/audio/Valentine.mp3" },
+  { title: "While You Were Sleeping", artist: "Laufey", data: "assets/audio/While%20You%20Were%20Sleeping.mp3" },
 ];
