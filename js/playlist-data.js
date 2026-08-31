@@ -22,4 +22,8 @@ window.SONGS = [
   { title: "Puddles", artist: "Not For Radio", data: "assets/audio/Puddles.mp3" },
   { title: "Valentine", artist: "Laufey", data: "assets/audio/Valentine.mp3" },
   { title: "While You Were Sleeping", artist: "Laufey", data: "assets/audio/While%20You%20Were%20Sleeping.mp3" },
+  { title: "ESCORT", artist: "Chase Atlantic", data: "assets/audio/ESCORT.mp3" },
+  { title: "ONLY", artist: "LeeHi", data: "assets/audio/ONLY.mp3" },
+  { title: "Bewitched", artist: "Laufey", data: "assets/audio/Bewitched.mp3" },
+  { title: "if it's not you", artist: "PRYVT", data: "assets/audio/if%20it%27s%20not%20you.mp3" },
 ];
