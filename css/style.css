@@ -1374,6 +1374,31 @@
     visibility:hidden;
   }
 
+  /* Second hint — same look as #song-hint above, just tucked under the
+     player pill pointing at the progress row instead of the top pill. */
+  #skip-hint{
+    align-self:flex-end;
+    margin-top:2px;
+    font-family:'Baloo 2', sans-serif;
+    font-size:13px;
+    color:#D6699A;
+    background: linear-gradient(180deg, #FFFFFF, #FDF4F8);
+    border:2px solid var(--pink);
+    border-radius:999px;
+    padding:6px 12px;
+    white-space:nowrap;
+    box-shadow: 0 4px 12px -2px rgba(214,120,160,0.35);
+    opacity:1;
+    transform: translateY(0);
+    transition: opacity 0.6s ease, transform 0.6s ease, visibility 0.6s;
+    pointer-events:none;
+  }
+  #skip-hint.hidden{
+    opacity:0;
+    transform: translateY(-4px);
+    visibility:hidden;
+  }
+
   #song-picker-wrap{ position:relative; display:flex; flex-direction:column; align-items:flex-end; gap:9px; }
   #song-label-anchor{ position:relative; }
   #song-label{
@@ -1766,6 +1791,7 @@
       gap:7px;
     }
     #song-hint{ font-size:11px; padding:5px 9px; }
+    #skip-hint{ font-size:11px; padding:5px 9px; }
     #song-label{ font-size:11.5px; padding:6px 11px; width:108px; }
     #song-progress-row{ width:86px; padding:3px 8px; }
     #play-pause-toggle{ width:24px; height:24px; }
