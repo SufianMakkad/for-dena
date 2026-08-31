@@ -31,7 +31,8 @@
     document.getElementById('parallax-5'),
     document.getElementById('parallax-6'),
     document.getElementById('parallax-7'),
-    document.getElementById('parallax-8')
+    document.getElementById('parallax-8'),
+    document.getElementById('reveal-parallax')
   ].filter(Boolean);
   const isDesktop = window.matchMedia('(pointer: fine)').matches;
 
@@ -746,6 +747,37 @@
     }, CLOSE_ANIM_MS);
   });
 
+  // ---- Home button ----
+  // Jumps straight back to page 1 (the envelope) from anywhere in the
+  // site, instead of clicking "back" repeatedly. Resets every story
+  // screen's revealed-lines state too, so re-opening the envelope later
+  // starts each page fresh, exactly like using the normal back chain would.
+  function goHome(){
+    storyScreens.forEach((screen) => {
+      screen.el.classList.remove('is-active');
+      screen.story.reset();
+    });
+    screenReveal.classList.remove('is-active', 'revealed');
+    document.body.classList.remove('showing-reveal');
+    document.body.classList.remove('transitioning');
+    document.body.classList.add('closing');
+    envelope.classList.remove('is-open');
+    hasTransitioned = false;
+    resetStory();
+    currentPageIndex = 0;
+    updateDots();
+    setTimeout(() => {
+      document.body.classList.remove('closing');
+    }, CLOSE_ANIM_MS);
+  }
+
+  document.querySelectorAll('.home-btn').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      goHome();
+    });
+  });
+
   // ---- Background music ----
   // Starts silent and fades in slowly after page load (and/or her first
   // gesture, since browsers block autoplay-with-sound until there's been
@@ -771,6 +803,19 @@
   const songProgressFill = document.getElementById('song-progress-fill');
   const songTimeElapsed = document.getElementById('song-time-elapsed');
   const songTimeTotal = document.getElementById('song-time-total');
+  const playerExpandBtn = document.getElementById('player-expand-btn');
+  const playerExpanded = document.getElementById('player-expanded');
+  const playerExpandedBackdrop = document.getElementById('player-expanded-backdrop');
+  const playerCollapseBtn = document.getElementById('player-collapse-btn');
+  const playerExpandedTitle = document.getElementById('player-expanded-title').querySelector('.title-inner');
+  const playerExpandedTrack = document.getElementById('player-expanded-track');
+  const playerExpandedFill = document.getElementById('player-expanded-fill');
+  const playerExpandedThumb = document.getElementById('player-expanded-thumb');
+  const playerExpandedElapsed = document.getElementById('player-expanded-elapsed');
+  const playerExpandedTotal = document.getElementById('player-expanded-total');
+  const playerExpandedPlay = document.getElementById('player-expanded-play');
+  const playerRewindBtn = document.getElementById('player-rewind-btn');
+  const playerForwardBtn = document.getElementById('player-forward-btn');
   const TARGET_VOLUME = 0.28; // gentle, comfortable starting level — she can drag it anywhere from here
   let currentVolume = TARGET_VOLUME;
   const FADE_IN_MS = 3200;    // slow initial fade-in, so it never startles her
@@ -827,6 +872,7 @@
       titleInner.classList.remove('fading');
       measureMarquee();
     }, TEXT_CROSSFADE_MS);
+    playerExpandedTitle.textContent = text;
   }
 
   // Only scroll titles that are actually too long to fit in the pill —
@@ -902,11 +948,26 @@
 
   music.addEventListener('loadedmetadata', () => {
     songTimeTotal.textContent = formatTime(music.duration);
+    playerExpandedTotal.textContent = formatTime(music.duration);
   });
+  // While actively dragging the big playhead, ignore the audio's own
+  // timeupdate events for visual position — the drag handler already
+  // moves the thumb/fill to follow the finger, and letting timeupdate
+  // fight it causes jitter.
+  let draggingPlayerSeek = false;
   music.addEventListener('timeupdate', () => {
     songTimeElapsed.textContent = formatTime(music.currentTime);
     if (music.duration){
-      songProgressFill.style.width = ((music.currentTime / music.duration) * 100) + '%';
+      const pct = (music.currentTime / music.duration) * 100;
+      songProgressFill.style.width = pct + '%';
+      if (!draggingPlayerSeek){
+        playerExpandedFill.style.width = pct + '%';
+        playerExpandedThumb.style.left = pct + '%';
+        playerExpandedTrack.setAttribute('aria-valuenow', String(Math.round(pct)));
+      }
+    }
+    if (!draggingPlayerSeek){
+      playerExpandedElapsed.textContent = formatTime(music.currentTime);
     }
   });
   // Tap anywhere on the track to jump to that point in the song.
@@ -925,14 +986,15 @@
     const isPaused = music.paused || music.ended;
     playPauseToggle.classList.toggle('paused', isPaused);
     playPauseToggle.setAttribute('aria-label', isPaused ? 'Play' : 'Pause');
+    playerExpandedPlay.classList.toggle('paused', isPaused);
+    playerExpandedPlay.setAttribute('aria-label', isPaused ? 'Play' : 'Pause');
   }
   music.addEventListener('play', updatePlayPauseUI);
   music.addEventListener('pause', updatePlayPauseUI);
   music.addEventListener('ended', updatePlayPauseUI);
   updatePlayPauseUI();
 
-  playPauseToggle.addEventListener('click', (e) => {
-    e.stopPropagation();
+  function togglePlayback(){
     songHint.classList.add('hidden');
     if (music.paused || music.ended){
       hasStartedMusic = true;
@@ -948,6 +1010,95 @@
     } else {
       // Fade out gently first so pausing doesn't cut the music off abruptly.
       fadeVolume(0, SWITCH_FADE_OUT_MS, () => music.pause());
+    }
+  }
+
+  playPauseToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    togglePlayback();
+  });
+  playerExpandedPlay.addEventListener('click', (e) => {
+    e.stopPropagation();
+    togglePlayback();
+  });
+
+  // ---- Skip back/forward 10s (enlarged player) ----
+  function skipBy(seconds){
+    if (!music.duration) return;
+    music.currentTime = Math.min(music.duration, Math.max(0, music.currentTime + seconds));
+  }
+  playerRewindBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    skipBy(-10);
+  });
+  playerForwardBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    skipBy(10);
+  });
+
+  // ---- Enlarged player open/close ----
+  function openPlayerExpanded(){
+    playerExpanded.classList.add('open');
+    playerExpanded.setAttribute('aria-hidden', 'false');
+    songHint.classList.add('hidden');
+  }
+  function closePlayerExpanded(){
+    playerExpanded.classList.remove('open');
+    playerExpanded.setAttribute('aria-hidden', 'true');
+  }
+  playerExpandBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openPlayerExpanded();
+  });
+  playerCollapseBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    closePlayerExpanded();
+  });
+  playerExpandedBackdrop.addEventListener('click', () => closePlayerExpanded());
+
+  // ---- Enlarged seek bar: big drag target for easy skip/rewind on phone ----
+  function ratioFromTrackPointer(e){
+    const rect = playerExpandedTrack.getBoundingClientRect();
+    const clientX = (e.touches && e.touches.length) ? e.touches[0].clientX : e.clientX;
+    return Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+  }
+  function setSeekVisual(ratio){
+    const pct = ratio * 100;
+    playerExpandedFill.style.width = pct + '%';
+    playerExpandedThumb.style.left = pct + '%';
+    playerExpandedTrack.setAttribute('aria-valuenow', String(Math.round(pct)));
+    if (music.duration){
+      playerExpandedElapsed.textContent = formatTime(ratio * music.duration);
+    }
+  }
+  playerExpandedTrack.addEventListener('pointerdown', (e) => {
+    if (!music.duration) return;
+    draggingPlayerSeek = true;
+    playerExpandedTrack.classList.add('dragging');
+    setSeekVisual(ratioFromTrackPointer(e));
+    e.preventDefault();
+  });
+  window.addEventListener('pointermove', (e) => {
+    if (!draggingPlayerSeek) return;
+    setSeekVisual(ratioFromTrackPointer(e));
+  });
+  window.addEventListener('pointerup', (e) => {
+    if (!draggingPlayerSeek) return;
+    draggingPlayerSeek = false;
+    playerExpandedTrack.classList.remove('dragging');
+    if (music.duration){
+      music.currentTime = ratioFromTrackPointer(e) * music.duration;
+    }
+  });
+  // Keyboard support on the big seek bar, mirroring the volume thumb.
+  playerExpandedTrack.addEventListener('keydown', (e) => {
+    if (!music.duration) return;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowUp'){
+      skipBy(5);
+      e.preventDefault();
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown'){
+      skipBy(-5);
+      e.preventDefault();
     }
   });
 
