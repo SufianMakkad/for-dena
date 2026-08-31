@@ -1592,16 +1592,28 @@
   #player-collapse-btn:hover{ background: rgba(242,166,198,0.32); transform:scale(1.06); }
   #player-collapse-btn svg{ width:16px; height:16px; }
   #player-expanded-title{
+    width:100%;
+    text-align:center;
+    padding:0 12px;
+  }
+  #player-expanded-song{
     font-family:'Baloo 2', sans-serif;
     font-weight:600;
     font-size:16px;
     color:#D6699A;
-    text-align:center;
     overflow:hidden;
     white-space:nowrap;
     text-overflow:ellipsis;
-    max-width:100%;
-    padding:0 12px;
+  }
+  #player-expanded-artist{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:500;
+    font-size:12px;
+    color:#F2A6C6;
+    margin-top:2px;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
   }
   #player-expanded-progress{
     width:100%;
