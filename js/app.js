@@ -814,8 +814,8 @@
   const playerExpandedElapsed = document.getElementById('player-expanded-elapsed');
   const playerExpandedTotal = document.getElementById('player-expanded-total');
   const playerExpandedPlay = document.getElementById('player-expanded-play');
-  const playerRewindBtn = document.getElementById('player-rewind-btn');
-  const playerForwardBtn = document.getElementById('player-forward-btn');
+  const playerPrevBtn = document.getElementById('player-prev-btn');
+  const playerNextBtn = document.getElementById('player-next-btn');
   const TARGET_VOLUME = 0.28; // gentle, comfortable starting level — she can drag it anywhere from here
   let currentVolume = TARGET_VOLUME;
   const FADE_IN_MS = 3200;    // slow initial fade-in, so it never startles her
@@ -963,7 +963,7 @@
       if (!draggingPlayerSeek){
         playerExpandedFill.style.width = pct + '%';
         playerExpandedThumb.style.left = pct + '%';
-        playerExpandedTrack.setAttribute('aria-valuenow', String(Math.round(pct)));
+        playerExpandedThumb.setAttribute('aria-valuenow', String(Math.round(pct)));
       }
     }
     if (!draggingPlayerSeek){
@@ -1022,18 +1022,36 @@
     togglePlayback();
   });
 
-  // ---- Skip back/forward 10s (enlarged player) ----
-  function skipBy(seconds){
-    if (!music.duration) return;
-    music.currentTime = Math.min(music.duration, Math.max(0, music.currentTime + seconds));
+  // ---- Previous / next song (enlarged player) ----
+  // Standard media-player "back" behavior: the first press just rewinds
+  // the current song to the start. A second press right after that one
+  // is what actually jumps to the previous track. Forward always just
+  // advances to the next track.
+  let prevPressArmed = false;
+  let prevArmTimer = null;
+  function handlePrevious(){
+    if (prevPressArmed){
+      prevPressArmed = false;
+      clearTimeout(prevArmTimer);
+      loadSong(currentSongIndex - 1, true, { userInitiated: true });
+    } else {
+      music.currentTime = 0;
+      prevPressArmed = true;
+      clearTimeout(prevArmTimer);
+      prevArmTimer = setTimeout(() => { prevPressArmed = false; }, 4000);
+    }
   }
-  playerRewindBtn.addEventListener('click', (e) => {
+  function handleNext(){
+    prevPressArmed = false;
+    loadSong(currentSongIndex + 1, true, { userInitiated: true });
+  }
+  playerPrevBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    skipBy(-10);
+    handlePrevious();
   });
-  playerForwardBtn.addEventListener('click', (e) => {
+  playerNextBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    skipBy(10);
+    handleNext();
   });
 
   // ---- Enlarged player open/close ----
@@ -1062,17 +1080,18 @@
     const pct = ratio * 100;
     playerExpandedFill.style.width = pct + '%';
     playerExpandedThumb.style.left = pct + '%';
-    playerExpandedTrack.setAttribute('aria-valuenow', String(Math.round(pct)));
+    playerExpandedThumb.setAttribute('aria-valuenow', String(Math.round(pct)));
     if (music.duration){
       playerExpandedElapsed.textContent = formatTime(ratio * music.duration);
     }
   }
-  playerExpandedTrack.addEventListener('pointerdown', (e) => {
+  playerExpandedThumb.addEventListener('pointerdown', (e) => {
     if (!music.duration) return;
     draggingPlayerSeek = true;
     playerExpandedTrack.classList.add('dragging');
     setSeekVisual(ratioFromTrackPointer(e));
     e.preventDefault();
+    e.stopPropagation();
   });
   window.addEventListener('pointermove', (e) => {
     if (!draggingPlayerSeek) return;
@@ -1086,14 +1105,15 @@
       music.currentTime = ratioFromTrackPointer(e) * music.duration;
     }
   });
-  // Keyboard support on the big seek bar, mirroring the volume thumb.
-  playerExpandedTrack.addEventListener('keydown', (e) => {
+  // Keyboard support on the playhead, mirroring the volume thumb.
+  playerExpandedThumb.setAttribute('tabindex', '0');
+  playerExpandedThumb.addEventListener('keydown', (e) => {
     if (!music.duration) return;
     if (e.key === 'ArrowRight' || e.key === 'ArrowUp'){
-      skipBy(5);
+      music.currentTime = Math.min(music.duration, music.currentTime + 5);
       e.preventDefault();
     } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown'){
-      skipBy(-5);
+      music.currentTime = Math.max(0, music.currentTime - 5);
       e.preventDefault();
     }
   });
