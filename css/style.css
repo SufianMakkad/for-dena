@@ -1473,7 +1473,10 @@
     border-radius:999px;
     padding:4px 10px;
     box-shadow: 0 3px 10px -3px rgba(214,120,160,0.3);
+    cursor:pointer;
+    transition: transform 0.15s ease;
   }
+  #song-progress-row:active{ transform: scale(0.97); }
   #song-time-elapsed,
   #song-time-total{
     font-family:'Baloo 2', sans-serif;
@@ -1499,25 +1502,8 @@
     transition: width 0.15s linear;
   }
 
-  /* Small expand button beside the mini seek bar — opens the big player
-     below so skipping/rewinding is easy to hit with a thumb on phone. */
-  #player-expand-btn{
-    width:26px;
-    height:26px;
-    border-radius:50%;
-    border:2px solid var(--pink);
-    background: linear-gradient(180deg, #FFFFFF, #FDF4F8);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    cursor:pointer;
-    padding:0;
-    flex-shrink:0;
-    box-shadow: 0 3px 10px -3px rgba(214,120,160,0.3);
-    transition: transform 0.2s ease;
-  }
-  #player-expand-btn:hover{ transform:scale(1.08); }
-  #player-expand-btn svg{ width:13px; height:13px; }
+  /* Tapping the mini player itself (the progress row) opens the big
+     enlarged player below — no separate button needed. */
 
   /* ---------------- ENLARGED PLAYER ---------------- */
   #player-expanded{
