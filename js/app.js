@@ -1023,26 +1023,30 @@
   });
 
   // ---- Previous / next song (enlarged player) ----
-  // Standard media-player "back" behavior: the first press just rewinds
-  // the current song to the start. A second press right after that one
-  // is what actually jumps to the previous track. Forward always just
-  // advances to the next track.
+  // Spotify-style "back" behavior: a press right after a pause rewinds
+  // the current song to the start. Pressing it again quickly (or
+  // repeatedly, in a row) skips to the previous track each time — she
+  // doesn't need to double-press for every song, just keep tapping.
   let prevPressArmed = false;
   let prevArmTimer = null;
+  const PREV_ARM_MS = 2500;
+  function armPrevious(){
+    prevPressArmed = true;
+    clearTimeout(prevArmTimer);
+    prevArmTimer = setTimeout(() => { prevPressArmed = false; }, PREV_ARM_MS);
+  }
   function handlePrevious(){
     if (prevPressArmed){
-      prevPressArmed = false;
-      clearTimeout(prevArmTimer);
       loadSong(currentSongIndex - 1, true, { userInitiated: true });
+      armPrevious(); // stays armed so the next tap goes straight back again
     } else {
       music.currentTime = 0;
-      prevPressArmed = true;
-      clearTimeout(prevArmTimer);
-      prevArmTimer = setTimeout(() => { prevPressArmed = false; }, 4000);
+      armPrevious();
     }
   }
   function handleNext(){
     prevPressArmed = false;
+    clearTimeout(prevArmTimer);
     loadSong(currentSongIndex + 1, true, { userInitiated: true });
   }
   playerPrevBtn.addEventListener('click', (e) => {
