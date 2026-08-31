@@ -7,4 +7,5 @@ window.SONGS = [
   { title: "Ripples of Past Reverie", artist: "HOYO-MiX, Cassie Wei", data: "assets/audio/Ripples%20of%20Past%20Reverie.mp3" },
   { title: "Carousel", artist: "Laufey", data: "assets/audio/Carousel.mp3" },
   { title: "JANE DOE", artist: "Kenshi Yonezu, Hikaru Utada", data: "assets/audio/JANE%20DOE.mp3" },
+  { title: "Love song", artist: "Lana Del Ray", data: "assets/audio/Love%20song.mp3" },
 ];
