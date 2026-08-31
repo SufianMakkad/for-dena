@@ -12,4 +12,5 @@ window.SONGS = [
   { title: "Diet Pepsi", artist: "Addison Rae", data: "assets/audio/Diet%20Pepsi.mp3" },
   { title: "El Hob Gany | الحب جاني", artist: "TUL8TE", data: "assets/audio/El%20Hob%Gany.mp3" },
   { title: "KALAMANTINA | كلمنتينا" , artist: "Saint Levant ft. Marwan Moussa", data: "assets/audio/Kalamantina.mp3" },
+  { title: "Supernatural", artist: "NewJeans", data: "assets/audio/Supernatural.mp3" },
 ];
