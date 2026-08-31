@@ -799,11 +799,11 @@
   const titleInner = songTitleText.querySelector('.title-inner');
   const songMenu = document.getElementById('song-menu');
   const playPauseToggle = document.getElementById('play-pause-toggle');
+  const songProgressRow = document.getElementById('song-progress-row');
   const songProgressTrack = document.getElementById('song-progress-track');
   const songProgressFill = document.getElementById('song-progress-fill');
   const songTimeElapsed = document.getElementById('song-time-elapsed');
   const songTimeTotal = document.getElementById('song-time-total');
-  const playerExpandBtn = document.getElementById('player-expand-btn');
   const playerExpanded = document.getElementById('player-expanded');
   const playerExpandedBackdrop = document.getElementById('player-expanded-backdrop');
   const playerCollapseBtn = document.getElementById('player-collapse-btn');
@@ -970,12 +970,12 @@
       playerExpandedElapsed.textContent = formatTime(music.currentTime);
     }
   });
-  // Tap anywhere on the track to jump to that point in the song.
-  songProgressTrack.addEventListener('click', (e) => {
-    if (!music.duration) return;
-    const rect = songProgressTrack.getBoundingClientRect();
-    const ratio = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
-    music.currentTime = ratio * music.duration;
+  // Tapping the mini player itself opens the big enlarged player — this
+  // is the fix for "hard to skip/rewind on phone", instead of trying to
+  // hit the tiny bar directly.
+  songProgressRow.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openPlayerExpanded();
   });
 
   // Play/pause button — shows the play triangle while paused/ended, and
@@ -1046,10 +1046,6 @@
     playerExpanded.classList.remove('open');
     playerExpanded.setAttribute('aria-hidden', 'true');
   }
-  playerExpandBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    openPlayerExpanded();
-  });
   playerCollapseBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     closePlayerExpanded();
