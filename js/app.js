@@ -794,6 +794,13 @@
   const volumeThumb = document.getElementById('volume-slider-thumb');
   const iconSpin = soundToggle.querySelector('.icon-spin');
   const songHint = document.getElementById('song-hint');
+  const skipHint = document.getElementById('skip-hint');
+  function dismissSkipHint(){
+    skipHint.classList.add('hidden');
+  }
+  ['click', 'touchstart', 'keydown'].forEach((evt) => {
+    document.addEventListener(evt, dismissSkipHint, { once: true, passive: true });
+  });
   const songLabel = document.getElementById('song-label');
   const songTitleText = document.getElementById('song-title-text');
   const titleInner = songTitleText.querySelector('.title-inner');
