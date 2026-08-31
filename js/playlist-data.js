@@ -13,4 +13,7 @@ window.SONGS = [
   { title: "El Hob Gany | الحب جاني", artist: "TUL8TE", data: "assets/audio/El%20Hob%20Gany.mp3" },
   { title: "KALAMANTINA | كلمنتينا" , artist: "Saint Levant ft. Marwan Moussa", data: "assets/audio/Kalamantina.mp3" },
   { title: "Supernatural", artist: "NewJeans", data: "assets/audio/Supernatural.mp3" },
+  { title: "Apple Cider", artist: "beabadoobee", data: "assets/audio/Apple%20Cider.mp3" },
+  { title: "Scott and Zelda", artist: "BIBI", data: "assets/audio/Scott%20and%20Zelda.mp3" },
+  { title: "may you never forget me", artist: "Temachii", data: "assets/audio/may%20you%20never%20forget%20me.mp3" },
 ];
