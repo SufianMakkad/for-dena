@@ -802,8 +802,8 @@
   const playPauseToggle = document.getElementById('play-pause-toggle');
   const songProgressRow = document.getElementById('song-progress-row');
   const songProgressTrack = document.getElementById('song-progress-track');
-  const songPickerWrap = document.getElementById('song-picker-wrap');
-  songPickerWrap.addEventListener('click', () => {
+  const musicCluster = document.getElementById('music-cluster');
+  musicCluster.addEventListener('click', () => {
     skipHint.classList.add('hidden');
   }, { once: true });
   const songProgressFill = document.getElementById('song-progress-fill');
