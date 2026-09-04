@@ -803,9 +803,14 @@
   const songProgressRow = document.getElementById('song-progress-row');
   const songProgressTrack = document.getElementById('song-progress-track');
   const musicCluster = document.getElementById('music-cluster');
-  musicCluster.addEventListener('click', () => {
+  // The skip-hint only goes away once she's actually used the player
+  // (play/pause, the progress row, or the song label) — see the
+  // hideSkipHint() calls wired into each of those handlers below —
+  // rather than on any tap inside the cluster (which used to include
+  // taps on the hint bubble itself, since it sits over empty space).
+  function hideSkipHint(){
     skipHint.classList.add('hidden');
-  }, { once: true });
+  }
   const songProgressFill = document.getElementById('song-progress-fill');
   const songTimeElapsed = document.getElementById('song-time-elapsed');
   const songTimeTotal = document.getElementById('song-time-total');
@@ -822,6 +827,10 @@
   const playerExpandedPlay = document.getElementById('player-expanded-play');
   const playerPrevBtn = document.getElementById('player-prev-btn');
   const playerNextBtn = document.getElementById('player-next-btn');
+  const shuffleToggleBtn = document.getElementById('shuffle-toggle-btn');
+  const loopToggleBtn = document.getElementById('loop-toggle-btn');
+  let isShuffle = false;
+  let isLooping = false;
   const TARGET_VOLUME = 0.28; // gentle, comfortable starting level — she can drag it anywhere from here
   let currentVolume = TARGET_VOLUME;
   const FADE_IN_MS = 3200;    // slow initial fade-in, so it never startles her
@@ -982,6 +991,7 @@
   // hit the tiny bar directly.
   songProgressRow.addEventListener('click', (e) => {
     e.stopPropagation();
+    hideSkipHint();
     openPlayerExpanded();
   });
 
@@ -1022,10 +1032,12 @@
 
   playPauseToggle.addEventListener('click', (e) => {
     e.stopPropagation();
+    hideSkipHint();
     togglePlayback();
   });
   playerExpandedPlay.addEventListener('click', (e) => {
     e.stopPropagation();
+    hideSkipHint();
     togglePlayback();
   });
 
@@ -1054,16 +1066,56 @@
   function handleNext(){
     prevPressArmed = false;
     clearTimeout(prevArmTimer);
-    loadSong(currentSongIndex + 1, true, { userInitiated: true });
+    loadSong(pickNextIndex(), true, { userInitiated: true });
   }
   playerPrevBtn.addEventListener('click', (e) => {
     e.stopPropagation();
+    hideSkipHint();
     handlePrevious();
   });
   playerNextBtn.addEventListener('click', (e) => {
     e.stopPropagation();
+    hideSkipHint();
     handleNext();
   });
+
+  // ---- Shuffle / loop toggles ----
+  function updateShuffleUI(){
+    shuffleToggleBtn.classList.toggle('active', isShuffle);
+    shuffleToggleBtn.setAttribute('aria-pressed', String(isShuffle));
+  }
+  function updateLoopUI(){
+    loopToggleBtn.classList.toggle('active', isLooping);
+    loopToggleBtn.setAttribute('aria-pressed', String(isLooping));
+  }
+  shuffleToggleBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    hideSkipHint();
+    isShuffle = !isShuffle;
+    updateShuffleUI();
+  });
+  loopToggleBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    hideSkipHint();
+    isLooping = !isLooping;
+    updateLoopUI();
+  });
+  updateShuffleUI();
+  updateLoopUI();
+
+  // Picks the next song to play, respecting shuffle: a random track that
+  // isn't the one currently playing (as long as there's more than one to
+  // pick from), otherwise the plain next-in-order track.
+  function pickNextIndex(){
+    if (isShuffle && SONGS.length > 1){
+      let next;
+      do {
+        next = Math.floor(Math.random() * SONGS.length);
+      } while (next === currentSongIndex);
+      return next;
+    }
+    return currentSongIndex + 1;
+  }
 
   // ---- Enlarged player open/close ----
   function openPlayerExpanded(){
@@ -1164,6 +1216,7 @@
     // Tapping the music player itself also counts as "found it" — the
     // hint can go away for good.
     songHint.classList.add('hidden');
+    hideSkipHint();
   });
   document.addEventListener('click', (e) => {
     if (!songMenu.contains(e.target) && e.target !== songLabel){
@@ -1240,10 +1293,17 @@
     titleInner.textContent = 'No songs loaded';
   }
 
-  // When one song ends, roll into the next one automatically instead of
-  // looping the same track forever — with the same gentle crossfade.
+  // When one song ends: if loop is on, replay the same track from the
+  // start; otherwise roll into the next one automatically (shuffled if
+  // shuffle is on), with the same gentle crossfade either way.
   music.addEventListener('ended', () => {
-    loadSong(currentSongIndex + 1, true, { userInitiated: true });
+    if (isLooping){
+      music.currentTime = 0;
+      const p = music.play();
+      if (p && typeof p.then === 'function') p.catch(() => {});
+      return;
+    }
+    loadSong(pickNextIndex(), true, { userInitiated: true });
   });
 
   // Try to start the music the instant the page loads — this is what
