@@ -1,0 +1,1986 @@
+
+  :root{
+    /* Change this to her actual accent color if you want, this is a mid pink */
+    --pink: #F2A6C6;
+    --purple: #C9AEDE;
+    --gold: #D6A85B;
+    --ink: #4A2C4D;
+    color-scheme: light only; /* stops phones from re-theming this page when system dark mode is on */
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+
+  html{ color-scheme: light only; }
+
+  body{
+    background:#FFFFFF;
+    color: var(--ink);
+    height:100vh;
+    width:100vw;
+    overflow:hidden;
+    font-family:'Baloo 2', sans-serif;
+    position:relative;
+  }
+
+  /* 
+    #bg-layer holds the gradient + stripes as its own element, sized bigger
+    than the viewport (120% via negative inset) so that when it drifts with
+    parallax there's no gap/edge showing at the sides.
+    This layer moves LESS than #stage — that's what sells the depth: the
+    background feels "further away" than the envelope+flowers in front of it.
+  */
+  #bg-layer{
+    position:absolute;
+    inset:-10%;
+    background:
+      repeating-linear-gradient(
+        90deg,
+        rgba(242,166,198,0.05) 0px,
+        rgba(242,166,198,0.05) 40px,
+        rgba(242,166,198,0) 40px,
+        rgba(242,166,198,0) 80px
+      ),
+      linear-gradient(180deg, #FDEFF5 0%, #FFFFFF 55%, #FDEFF5 100%);
+    transition: transform 0.15s ease-out;
+    z-index:0;
+  }
+
+  /* Faint decorative hearts scattered across the background layer.
+     They drift with the background (slowest layer), reinforcing the
+     sense that they're sitting further back than the flowers/envelope. */
+  .bg-heart{
+    position:absolute;
+    opacity:1;
+    color:#FDEAF2;
+  }
+  /* Big hearts, spread evenly across a 3x3 grid (center left open for the envelope) */
+  .bg-heart.h1{ top:8%;  left:12%; width:44px; height:44px; transform:rotate(-12deg); }
+  .bg-heart.h2{ top:8%;  left:47%; width:52px; height:52px; transform:rotate(8deg); }
+  .bg-heart.h3{ top:8%;  right:10%; width:60px; height:60px; transform:rotate(16deg); }
+  .bg-heart.h4{ top:46%; left:6%;  width:38px; height:38px; transform:rotate(9deg); }
+  .bg-heart.h5{ top:46%; right:8%; width:50px; height:50px; transform:rotate(-6deg); }
+  .bg-heart.h6{ bottom:8%; left:12%;  width:54px; height:54px; transform:rotate(11deg); }
+  .bg-heart.h7{ bottom:8%; left:47%; width:36px; height:36px; transform:rotate(-15deg); }
+  .bg-heart.h8{ bottom:8%; right:10%; width:34px; height:34px; transform:rotate(-9deg); }
+
+  /* Small companion hearts, each tucked near one of the big hearts above */
+  .bg-heart.s1{ top:16%;  left:20%; width:16px; height:16px; transform:rotate(18deg); }
+  .bg-heart.s2{ top:5%;   left:39%; width:14px; height:14px; transform:rotate(-10deg); }
+  .bg-heart.s3{ top:17%;  right:19%; width:18px; height:18px; transform:rotate(-20deg); }
+  .bg-heart.s4{ top:41%;  left:15%; width:14px; height:14px; transform:rotate(-16deg); }
+  .bg-heart.s5{ top:56%;  right:16%; width:16px; height:16px; transform:rotate(12deg); }
+  .bg-heart.s6{ bottom:17%; left:21%; width:18px; height:18px; transform:rotate(-14deg); }
+  .bg-heart.s7{ bottom:3%;  left:55%; width:14px; height:14px; transform:rotate(20deg); }
+  .bg-heart.s8{ bottom:16%; right:18%; width:15px; height:15px; transform:rotate(15deg); }
+
+  /* Extra hearts filling in the remaining gaps for a fuller scatter */
+  .bg-heart.e1{ top:2%;   left:2%;  width:26px; height:26px; transform:rotate(6deg); }
+  .bg-heart.e2{ top:2%;   right:32%; width:20px; height:20px; transform:rotate(-18deg); }
+  .bg-heart.e3{ top:26%;  left:32%; width:30px; height:30px; transform:rotate(14deg); }
+  .bg-heart.e4{ top:28%;  right:28%; width:24px; height:24px; transform:rotate(-9deg); }
+  .bg-heart.e5{ top:62%;  left:28%; width:28px; height:28px; transform:rotate(-11deg); }
+  .bg-heart.e6{ top:64%;  right:34%; width:22px; height:22px; transform:rotate(19deg); }
+  .bg-heart.e7{ bottom:2%; left:30%; width:24px; height:24px; transform:rotate(-7deg); }
+  .bg-heart.e8{ bottom:2%; right:2%;  width:30px; height:30px; transform:rotate(13deg); }
+  .bg-heart.e9{ top:34%;  left:2%;  width:16px; height:16px; transform:rotate(21deg); }
+  .bg-heart.e10{ top:36%; right:2%; width:14px; height:14px; transform:rotate(-13deg); }
+  .bg-heart.e11{ bottom:30%; left:44%; width:12px; height:12px; transform:rotate(17deg); }
+  .bg-heart.e12{ top:20%; left:60%; width:12px; height:12px; transform:rotate(-22deg); }
+
+  /* Four little bunny stickers tucked in the corners, same layout as
+     the reference: hearts top-left, blush top-right, sparkles
+     bottom-left, eating bottom-right. Drift with the background layer
+     along with everything else in here. */
+  .bunny-sticker{
+    position:absolute;
+    width:76px;
+    height:76px;
+    object-fit:contain;
+  }
+  .bunny-sticker.hearts{   top:6%;    left:6%;   transform:rotate(-6deg); }
+  .bunny-sticker.blush{    top:6%;    right:6%;  transform:rotate(5deg); }
+  .bunny-sticker.sparkles{ bottom:7%; left:6%;   transform:rotate(4deg); }
+  .bunny-sticker.eating{   bottom:7%; right:6%;  transform:rotate(-4deg); }
+
+  /* 
+    #stage is the container that moves with the mouse.
+    Everything inside it (envelope + flowers) drifts together as one scene,
+    like the whole scene has slight depth. Desktop only — see JS at bottom,
+    we check for a mouse before attaching the listener.
+  */
+  #stage{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:1;
+    transition: transform 0.15s ease-out; /* smooths the follow */
+  }
+
+  /* Flowers get their own layer, between the background and the envelope.
+     Same drift behaviour (position:absolute + transition), just a different
+     transform speed applied in JS, so they can move at their own rate. */
+  #flower-layer{
+    position:absolute;
+    inset:0;
+    z-index:1;
+    pointer-events:none;
+    transition: transform 0.15s ease-out;
+  }
+
+  /* ---------------- ENVELOPE ---------------- */
+  #envelope{
+    position:relative;
+    width:280px;
+    height:190px;
+    cursor:pointer;
+    background:none;
+    border:none;
+    padding:0;
+    transition: transform 0.25s ease;
+  }
+  #envelope:hover{
+    transform: translateY(-4px) scale(1.02);
+  }
+  #envelope:focus-visible{
+    outline:2px solid var(--pink);
+    outline-offset:6px;
+    border-radius:10px;
+  }
+
+  /* ---- Page transition: clicking the envelope opens it, then a beat
+     later the whole scene (envelope + flowers + background) fades/zooms
+     out together and the next screen fades in on top of it. ---- */
+  body.transitioning #flower-layer,
+  body.transitioning #stage{
+    transition: opacity 0.6s ease, transform 0.6s ease;
+    opacity:0;
+    transform: scale(1.06);
+  }
+
+  /* ---- Reverse transition (back button): mirrors the block above so the
+     scene fades/zooms back IN and the next screen fades back OUT.
+     This needs its own class (rather than just removing ".transitioning")
+     because a CSS transition is driven by the transition-property declared
+     in the style being switched TO — if we just removed ".transitioning",
+     the base rules below don't all declare a matching transition, so it'd
+     jump instead of animate. Swapping to ".closing" gives every property
+     an explicit transition to animate along. ---- */
+  body.closing #flower-layer,
+  body.closing #stage{
+    transition: opacity 0.6s ease, transform 0.6s ease;
+    opacity:1;
+    transform: scale(1);
+  }
+
+  /* ---- Tap-burst particles: a few little hearts/petals fly out from
+     wherever she taps on slide 2, drift for a moment, then fade away. ---- */
+  #particle-layer{
+    position:fixed;
+    inset:0;
+    z-index:30;
+    pointer-events:none;
+    overflow:hidden;
+  }
+  .tap-particle{
+    position:absolute;
+    top:0;
+    left:0;
+    width:16px;
+    height:16px;
+    color:#D6699A;
+    opacity:0;
+    will-change: transform, opacity;
+    animation-name: tapParticleMove, tapParticleFade;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1), ease-in-out;
+    animation-fill-mode: forwards, forwards;
+  }
+  /* Continuous single-curve motion — no intermediate keyframes, so there's
+     no easing reset partway through (that was what caused the old
+     start/stop/start stutter). Just one smooth fly-out from start to end. */
+  @keyframes tapParticleMove{
+    0%{
+      transform: translate(-50%, -50%) scale(0.5) rotate(var(--rot-start, 0deg));
+    }
+    100%{
+      transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1) rotate(var(--rot-end, 90deg));
+    }
+  }
+  /* Fully visible for most of the flight, then fades out only in the
+     last stretch — kept as a separate animation so it never interferes
+     with the movement curve above. */
+  @keyframes tapParticleFade{
+    0%{ opacity:0; }
+    8%{ opacity:1; }
+    78%{ opacity:1; }
+    100%{ opacity:0; }
+  }
+
+  #next-screen{
+    position:fixed;
+    inset:0;
+    z-index:10;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    overflow:hidden;
+    box-sizing:border-box;
+    background:transparent;
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+    transition: opacity 0.6s ease;
+  }
+  body.transitioning #next-screen{
+    opacity:1;
+    visibility:visible;
+    pointer-events:auto;
+    transition: opacity 0.6s ease 0.35s; /* starts fading in partway through the fade-out */
+  }
+  body.closing #next-screen{
+    transition: opacity 0.6s ease, visibility 0s linear 0.6s; /* stays visible/interactive-off until the fade finishes */
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+  }
+  /* Page 2 must fully hide once pages 3/4 (the reveal screen) are showing
+     on top of it — otherwise its text bleeds through since everything is
+     transparent now for the parallax effect. */
+  body.showing-reveal #next-screen{
+    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+  }
+  #next-screen-clip{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding-top:16vh;
+    padding-bottom:calc(40px + env(safe-area-inset-bottom, 0px));
+    overflow:hidden;
+    box-sizing:border-box;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 70px);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 70px);
+    pointer-events:none;
+  }
+  #forward-btn{
+    pointer-events:auto;
+  }
+  #next-screen-inner{
+    text-align:center;
+    color:#D6699A;
+    font-family:'Baloo 2', sans-serif;
+    font-weight:400;
+    font-size:1.05rem;
+    line-height:1.8;
+    letter-spacing:0.01em;
+    max-width:380px;
+    padding:0 32px;
+    opacity:0.8;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    transform: translateY(10px);
+    transition: transform 0.6s ease 0.35s;
+  }
+  /* Story lines are revealed one at a time on tap. Each starts invisible
+     + slightly lowered, then fades/rises into place — feels like it's
+     being written in, rather than just appearing. */
+  /* Wraps the slide-2 text + buttons together so they can drift as one
+     group for the parallax effect, independently of #next-screen-inner's
+     own fade-in transition (keeps the two animations from fighting). */
+  #next-screen-parallax{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    --parallax-x:0px;
+    --parallax-y:0px;
+    transform: translate(var(--parallax-x), var(--parallax-y));
+    transition: transform 0.5s ease-out;
+  }
+  #next-screen-inner .story-line,
+  .story-line{
+    margin-bottom:20px;
+    opacity:0;
+    transform: translateY(3px);
+    transition: opacity 2.2s cubic-bezier(0.25, 0.1, 0.25, 1), transform 2.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+  #next-screen-inner .story-line.is-shown,
+  .story-line.is-shown{
+    opacity:1;
+    transform: translateY(0);
+  }
+  #next-screen-inner .story-line:last-child,
+  .story-line:last-child{
+    margin-bottom:0;
+  }
+  #next-screen-inner .story-heart,
+  .story-heart{
+    width:0.85em;
+    height:0.85em;
+    fill:#D6699A;
+    vertical-align:-0.08em;
+  }
+  /* Gentle pulsing "tap to continue" hint, shown under the most recently
+     revealed line while there's still more story to reveal. */
+  .tap-hint{
+    font-family:'Comfortaa', 'Baloo 2', sans-serif;
+    font-weight:500;
+    font-size:0.8rem;
+    letter-spacing:0.04em;
+    text-transform:lowercase;
+    color:#D6699A;
+    opacity:0.45;
+    margin-top:6px;
+    max-height:40px;
+    overflow:hidden;
+    animation: tapHintPulse 1.8s ease-in-out infinite;
+    transition: opacity 0.4s ease, max-height 0.4s ease 0.3s, margin-top 0.4s ease 0.3s;
+  }
+  .tap-hint.is-hidden{
+    opacity:0 !important;
+    max-height:0;
+    margin-top:0;
+    pointer-events:none;
+  }
+  @keyframes tapHintPulse{
+    0%, 100%{ opacity:0.3; }
+    50%{ opacity:0.7; }
+  }
+  body.transitioning #next-screen-inner{
+    transform: translateY(0);
+  }
+  body.closing #next-screen-inner{
+    transition: transform 0.6s ease;
+    transform: translateY(10px);
+  }
+
+  /* ---- Hand-drawn "back" button, top-left of the next screen ---- */
+  #back-btn{
+    position:absolute;
+    top:24px;
+    left:24px;
+    width:130px;
+    height:52px;
+    background:none;
+    border:none;
+    cursor:pointer;
+    padding:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition: transform 0.2s ease;
+  }
+  #back-btn:hover{
+    transform: translateY(-2px) rotate(-1deg);
+  }
+  #back-btn:focus-visible{
+    outline:2px solid var(--pink);
+    outline-offset:6px;
+    border-radius:10px;
+  }
+
+  /* ---- Home button — sits just right of every "back" button, same
+     vertical rhythm across every screen since every back button shares
+     the same top/left/height across the site. Takes her straight back
+     to page 1 (the envelope). ---- */
+  .home-btn{
+    position:absolute;
+    top:26px;
+    left:172px;
+    width:44px;
+    height:44px;
+    background:none;
+    border:none;
+    cursor:pointer;
+    padding:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#D6699A;
+    transition: transform 0.2s ease, color 0.3s ease;
+    z-index:5;
+  }
+  .home-btn:hover{ transform: translateY(-2px) scale(1.08); }
+  .home-btn:focus-visible{
+    outline:2px solid var(--pink);
+    outline-offset:6px;
+    border-radius:10px;
+  }
+  .home-btn svg{ width:26px; height:26px; }
+  /* Matches back-btn-2's dark-theme override while the letterbox bars
+     are still up (locked state) so the house reads clearly there too. */
+  #screen-reveal:not(.revealed) #home-btn-2{
+    color:#B84C7E;
+  }
+  @media (max-width: 640px){
+    .home-btn{ top:24px; left:150px; width:38px; height:38px; }
+    .home-btn svg{ width:22px; height:22px; }
+  }
+  .back-btn-outline{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+  }
+  .back-btn-content{
+    position:relative;
+    z-index:1;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-family:'Caveat Brush', 'Baloo 2', sans-serif;
+    font-weight:400;
+    font-size:1.35rem;
+    color:#D6699A;
+    text-transform:lowercase;
+    letter-spacing:0.01em;
+  }
+  .back-heart{
+    width:0.85em;
+    height:0.85em;
+    fill:#D6699A;
+  }
+
+  /* ---- Forward button, mirrors the back-btn's hand-drawn wobbly-outline
+     style exactly (same SVG path shape, just facing the other side of
+     the flow) so the two feel like a matching pair. ---- */
+  #forward-btn{
+    position:relative;
+    width:170px;
+    height:52px;
+    background:none;
+    border:none;
+    cursor:pointer;
+    padding:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-top:20px;
+    opacity:0;
+    transform: translateY(6px);
+    pointer-events:none;
+    transition: transform 0.2s ease, opacity 0.6s ease;
+  }
+  #forward-btn.is-visible{
+    opacity:1;
+    transform: translateY(0);
+    pointer-events:auto;
+  }
+  #forward-btn.is-visible:hover{
+    transform: translateY(-2px) rotate(1deg);
+  }
+  #forward-btn:focus-visible{
+    outline:2px solid var(--pink);
+    outline-offset:6px;
+    border-radius:10px;
+  }
+  #forward-btn svg.back-heart{ width:0.85em; height:0.85em; fill:#D6699A; }
+
+  /* ---------------- SHARED "STORY SCREEN" STYLES ----------------
+     Used by every tap-to-reveal screen from page 3 onward (placeholder,
+     screen-4 through screen-7). Top-anchored layout (align-items:flex-start
+     + padding-top) exactly mirrors #next-screen (page 2) so lines never
+     shift when new ones are appended — matches page 2 pixel for pixel. */
+  .screen.story-screen{
+    overflow:hidden;
+    box-sizing:border-box;
+  }
+  /* Dedicated clip layer for the fade + push-up effect, separate from
+     the screen's own back button — back-btn is a sibling of this
+     element, not a descendant, so it never fades or moves regardless
+     of what the story-track inside does. Reproduces the centering/
+     padding the outer .screen used to do itself. */
+  .story-clip{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding-top:16vh;
+    padding-bottom:calc(40px + env(safe-area-inset-bottom, 0px));
+    overflow:hidden;
+    box-sizing:border-box;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 70px);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 70px);
+    /* Purely visual clip/fade layer — must never capture clicks or
+       hover, or it fights whatever sits behind/beside it (the back
+       button in particular) for cursor state, causing the pointer to
+       flicker between "clickable" and not. pointer-events:auto is
+       re-enabled on the buttons that actually live inside it below. */
+    pointer-events:none;
+  }
+  .story-forward-btn{
+    pointer-events:auto;
+  }
+  /* Wraps the growing story text + hint + button on every screen. JS
+     translates this element upward (never the container's scrollTop —
+     the container is overflow:hidden now, so no scrollbar ever appears)
+     only when the next revealed line would otherwise go past the
+     container's bottom edge. Combined with the mask-image fade above,
+     older lines drift up and fade out like movie credits, but only
+     when there genuinely isn't room for the new line — short stories
+     never move at all. */
+  .story-track{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    width:100%;
+  }
+  .story-back-btn{
+    position:absolute;
+    top:24px;
+    left:24px;
+    width:130px;
+    height:52px;
+    background:none;
+    border:none;
+    cursor:pointer;
+    padding:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition: transform 0.2s ease;
+  }
+  .story-back-btn:hover{ transform: translateY(-2px) rotate(-1deg); }
+  .story-back-btn:focus-visible{
+    outline:2px solid var(--pink);
+    outline-offset:6px;
+    border-radius:10px;
+  }
+  .story-parallax{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    --parallax-x:0px;
+    --parallax-y:0px;
+    transform: translate(var(--parallax-x), var(--parallax-y));
+    transition: transform 0.5s ease-out;
+  }
+  .story-inner{
+    text-align:center;
+    color:#D6699A;
+    font-family:'Baloo 2', sans-serif;
+    font-weight:400;
+    font-size:1.05rem;
+    line-height:1.8;
+    letter-spacing:0.01em;
+    max-width:380px;
+    padding:0 32px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  .story-forward-btn{
+    position:relative;
+    width:170px;
+    height:52px;
+    background:none;
+    border:none;
+    cursor:pointer;
+    padding:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-top:20px;
+    opacity:0;
+    transform: translateY(6px);
+    pointer-events:none;
+    transition: transform 0.2s ease, opacity 0.6s ease;
+  }
+  .story-forward-btn.is-visible{
+    opacity:1;
+    transform: translateY(0);
+    pointer-events:auto;
+  }
+  .story-forward-btn.is-visible:hover{
+    transform: translateY(-2px) rotate(1deg);
+  }
+  .story-forward-btn:focus-visible{
+    outline:2px solid var(--pink);
+    outline-offset:6px;
+    border-radius:10px;
+  }
+  .story-forward-btn svg.back-heart{ width:0.85em; height:0.85em; fill:#D6699A; }
+
+  /* ---------------- SCREEN: LETTERBOX REVEAL -> DISCORD INVITE ----------------
+     Fixed overlay, page 2/3 of the journey. Starts "locked": two slightly-
+     dark-pink bars (top + bottom, classic letterboxing) with a message and
+     a reveal button sitting in the gap between them. The Discord invite is
+     already in place underneath, just hidden. Tapping the button adds
+     .revealed to #screen-reveal, which slides the bars off (top up, bottom
+     down), fades the message out, and fades the Discord content in. */
+  .screen{
+    position:fixed;
+    inset:0;
+    z-index:11;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:transparent;
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+    transition: opacity 0.6s ease, visibility 0s linear 0.6s;
+  }
+  .screen.is-active{
+    opacity:1;
+    visibility:visible;
+    pointer-events:auto;
+    transition: opacity 0.6s ease;
+  }
+
+  .reveal-stage{
+    position:absolute;
+    inset:0;
+    overflow:hidden;
+  }
+
+  /* Wraps the discord content + reveal message (text/buttons only) so
+     they can drift with the desktop mouse / phone tilt parallax, same as
+     every other story screen. The letterbox bars are siblings of this
+     wrapper, not inside it, so they never inherit this movement. */
+  .reveal-parallax{
+    position:absolute;
+    inset:0;
+    --parallax-x:0px;
+    --parallax-y:0px;
+    transform: translate(var(--parallax-x), var(--parallax-y));
+    transition: transform 0.5s ease-out;
+  }
+
+  /* Discord content sits full-bleed behind the bars, invisible until revealed */
+  .discord-content{
+    position:absolute;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:16px;
+    text-align:center;
+    padding:0 32px;
+    z-index:1;
+  }
+  .discord-title{
+    font-family:'Caveat Brush','Baloo 2',sans-serif;
+    font-size:2rem;
+    color:var(--pink);
+    opacity:0;
+    transition: opacity 1.6s ease;
+  }
+  #screen-reveal.revealed .discord-title{
+    opacity:1;
+    transition-delay: 2.4s; /* right as the letterbox bars finish sliding out */
+  }
+  .discord-sub{
+    font-size:1rem;
+    opacity:0.75;
+    max-width:280px;
+  }
+  .discord-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    margin-top:6px;
+    padding:14px 26px;
+    border-radius:999px;
+    background:var(--pink);
+    color:#FFFFFF;
+    text-decoration:none;
+    font-family:'Caveat Brush','Baloo 2',sans-serif;
+    font-weight:400;
+    font-size:1.3rem;
+    text-transform:lowercase;
+    box-shadow: 0 14px 30px -12px rgba(242,166,198,0.55);
+    opacity:0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 1.6s ease;
+  }
+  #screen-reveal.revealed .discord-btn{
+    opacity:1;
+    transition-delay: 0s, 0s, 2.4s; /* only the opacity fade is delayed to match the title */
+  }
+  .discord-btn:hover{
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 18px 34px -12px rgba(242,166,198,0.65);
+  }
+  .discord-btn svg{ width:22px; height:22px; fill:#FFFFFF; }
+
+  /* Letterbox bars: start fully retracted off-screen (not visible at all),
+     slide in to cover the top/bottom 14% over 2.5s once this screen
+     becomes active, and slide back out over the same 2.5s when revealed.
+     pointer-events:none because these are purely decorative — they used
+     to sit in a higher stacking layer than #reveal-btn and could
+     intercept its hover/click hit-testing right at the button's edges,
+     which is what caused the stray-fill/cursor bug. */
+  .letterbox{
+    position:absolute;
+    left:0;
+    right:0;
+    background:#C9628F; /* slightly dark pink */
+    z-index:3;
+    pointer-events:none;
+    transition: transform 2.5s cubic-bezier(.65,0,.35,1);
+  }
+  .letterbox-top{ top:0; height:14%; transform: translateY(-100%); }
+  .letterbox-bottom{ bottom:0; height:14%; transform: translateY(100%); }
+  #screen-reveal.is-active:not(.revealed) .letterbox-top{ transform: translateY(0); }
+  #screen-reveal.is-active:not(.revealed) .letterbox-bottom{ transform: translateY(0); }
+
+  .reveal-message{
+    position:absolute;
+    top:14%;
+    bottom:14%;
+    left:0;
+    right:0;
+    z-index:4;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:18px;
+    padding:0 28px;
+    text-align:center;
+    background:transparent; /* transparent so the parallax bg shows through here too */
+    transition: opacity 0.4s ease;
+  }
+  #screen-reveal.revealed .reveal-message{
+    opacity:0;
+    pointer-events:none;
+  }
+  .reveal-message p{
+    font-family:'Caveat Brush','Baloo 2',sans-serif;
+    font-size:1.6rem;
+    line-height:1.3;
+    color:#D6699A;
+    max-width:300px;
+    opacity:0;
+    transition: opacity 1.6s ease;
+  }
+  #screen-reveal.is-active:not(.revealed) .reveal-message p{
+    opacity:1;
+    transition-delay: 2.5s; /* right as the letterbox bars finish closing */
+  }
+  #reveal-btn{
+    position:relative;
+    width:220px;
+    height:56px;
+    background:none;
+    border:none;
+    cursor:pointer;
+    padding:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    opacity:0;
+    transform: translateY(6px);
+    transition: transform 0.2s ease, opacity 0.6s ease;
+  }
+  #screen-reveal.is-active:not(.revealed) #reveal-btn{
+    opacity:1;
+    transform: translateY(0);
+    transition-delay: 3.5s; /* appears shortly after the text starts fading in */
+  }
+  #reveal-btn:hover{
+    transform: translateY(-2px) rotate(1deg);
+  }
+  #reveal-btn:focus-visible{
+    outline:2px solid var(--pink);
+    outline-offset:6px;
+    border-radius:10px;
+  }
+  #reveal-btn svg.back-heart{ width:0.85em; height:0.85em; fill:#D6699A; }
+
+  #back-btn-2{
+    position:absolute;
+    top:24px;
+    left:24px;
+    width:130px;
+    height:52px;
+    background:none;
+    border:none;
+    cursor:pointer;
+    padding:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition: transform 0.2s ease;
+    z-index:5;
+  }
+  #back-btn-2:hover{ transform: translateY(-2px) rotate(-1deg); }
+  #back-btn-2:focus-visible{
+    outline:2px solid var(--pink);
+    outline-offset:6px;
+    border-radius:10px;
+  }
+  /* Light theme (default) — matches the page 1 back button: no fill,
+     lighter pink text. Used on page 4, once the surprise is revealed. */
+  #back-btn-2 .back-btn-outline path{
+    fill:none;
+    transition: fill 0.3s ease;
+  }
+  #back-btn-2 .back-btn-content,
+  #back-btn-2 .back-heart{
+    transition: fill 0.3s ease, color 0.3s ease;
+  }
+  #back-btn-2 .back-btn-content{
+    color:#D6699A;
+  }
+  #back-btn-2 .back-heart{
+    fill:#D6699A;
+  }
+  /* Dark theme override — only while the letterbox bars are still up
+     (page 3, locked state): light pink fill behind the outline and darker
+     text so it reads clearly against the dark pink bars. */
+  #screen-reveal:not(.revealed) #back-btn-2 .back-btn-outline path{
+    fill:#FBDCE9;
+  }
+  #screen-reveal:not(.revealed) #back-btn-2 .back-btn-content{
+    color:#B84C7E;
+  }
+  #screen-reveal:not(.revealed) #back-btn-2 .back-heart{
+    fill:#B84C7E;
+  }
+
+  /* envelope body */
+  .env-body{
+    position:absolute;
+    inset:0;
+    background: linear-gradient(180deg, #FFFFFF, #FDF4F8);
+    border:2px solid var(--pink);
+    border-radius:10px;
+    box-shadow: 0 18px 40px -18px rgba(214,120,160,0.45);
+  }
+
+  /* envelope flap — a triangle made with CSS borders */
+  .env-flap{
+    position:absolute;
+    top:0; left:0; right:0;
+    height:0;
+    border-left:140px solid transparent;
+    border-right:140px solid transparent;
+    border-top:100px solid #FBE4EE;
+    filter: drop-shadow(0 2px 2px rgba(214,120,160,0.25));
+    transform-origin: top center;
+    transform-style: preserve-3d;
+    backface-visibility:hidden;
+    transition: transform 0.5s ease;
+  }
+  #envelope:hover .env-flap,
+  #envelope:focus-visible .env-flap,
+  #envelope.is-open .env-flap{
+    transform: rotateX(180deg);
+  }
+
+  /* Diagonal lines from the top corners down to the flap's V point,
+     drawn as an SVG overlay so they scale with the envelope at every
+     breakpoint (viewBox is percentage-based, not pixel-based). */
+  .env-flap-lines{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    z-index:2;
+    pointer-events:none;
+  }
+  .env-flap-lines line{
+    stroke:var(--pink);
+    stroke-width:2;
+    stroke-linecap:butt;
+    vector-effect:non-scaling-stroke;
+  }
+
+  /* Flower stamp sits right at the V — where the two flap lines meet */
+  .env-flower-stamp{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%, -50%);
+    width:34px;
+    height:34px;
+    z-index:3;
+    filter: drop-shadow(0 2px 3px rgba(214,120,160,0.3));
+  }
+
+  /* Main text + subtext travel together as one caption block, vertically
+     centered in the envelope. "tap to open" stays anchored to the bottom
+     separately (see .env-sub below). */
+  .env-caption{
+    position:absolute;
+    left:0; right:0;
+    top:50%;
+    transform:translateY(-50%);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:2px;
+    z-index:2;
+  }
+
+  .env-text{
+    text-align:center;
+    font-family:'Caveat Brush', 'Baloo 2', sans-serif;
+    font-weight:400;
+    font-size:1.9rem;
+    color:#D6699A;
+    letter-spacing:0.01em;
+  }
+
+  .env-subtitle{
+    text-align:center;
+    font-family:'Comfortaa', 'Baloo 2', sans-serif;
+    font-weight:500;
+    font-size:0.72rem;
+    color:#E487B0;
+    letter-spacing:0.02em;
+  }
+
+  /* Bouquet of 3 tulips that appears above the envelope only while she's
+     hovering (or keyboard-focused) — NOT while it's clicked open, per the
+     state table: closed = no bouquet, hover = bouquet, open = no bouquet.
+     Hidden and slightly lowered otherwise, then fades/rises into place. */
+  .tulip-reveal{
+    position:absolute;
+    top:-70px;
+    left:50%;
+    width:86px;
+    height:70px;
+    transform:translate(-50%, 10px);
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+    transition: opacity 0.35s ease, transform 0.35s ease, visibility 0s linear 0.35s;
+    z-index:4;
+  }
+  #envelope:hover .tulip-reveal,
+  #envelope:focus-visible .tulip-reveal,
+  #envelope.is-open .tulip-reveal{
+    opacity:1;
+    visibility:visible;
+    transition: opacity 0.35s ease, transform 0.35s ease, visibility 0s linear 0s;
+    transform:translate(-50%, 0);
+  }
+  .tulip-item{
+    position:absolute;
+    filter: drop-shadow(0 4px 6px rgba(214,120,160,0.35));
+  }
+  .tulip-item.t-left{
+    width:44px; height:44px;
+    bottom:2px; left:0;
+    transform:rotate(-16deg);
+  }
+  .tulip-item.t-center{
+    width:56px; height:56px;
+    bottom:14px; left:50%;
+    transform:translateX(-50%);
+    z-index:1;
+  }
+  .tulip-item.t-right{
+    width:44px; height:44px;
+    bottom:2px; right:0;
+    transform:rotate(16deg);
+  }
+
+  /* ---------------- STAMP ---------------- */
+  /* Sits in the top-right corner of the envelope, like a real postage stamp.
+     The dashed border mimics perforated stamp edges. The heart is drawn
+     with two circles + a rotated square (a classic CSS heart trick). */
+  .env-stamp{
+    position:absolute;
+    top:14px;
+    right:14px;
+    width:46px;
+    height:56px;
+    background:#FFFFFF;
+    border:2px dashed var(--pink);
+    border-radius:4px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:3;
+    box-shadow: 0 2px 6px rgba(214,120,160,0.18);
+  }
+  .env-stamp-heart{
+    position:relative;
+    width:20px;
+    height:18px;
+    transform: scale(0.85);
+  }
+  .env-stamp-heart::before,
+  .env-stamp-heart::after{
+    content:"";
+    position:absolute;
+    top:0;
+    width:11px;
+    height:16px;
+    background:var(--pink);
+    border-radius:11px 11px 0 0;
+  }
+  .env-stamp-heart::before{ left:10px; transform:rotate(-45deg); transform-origin:0 100%; }
+  .env-stamp-heart::after{ left:-1px; transform:rotate(45deg); transform-origin:100% 100%; }
+
+  .env-note{
+    position:absolute;
+    top:22px;
+    left:0;
+    right:66px;
+    text-align:center;
+    font-size:0.5rem;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--pink);
+    font-weight:500;
+    opacity:0.9;
+    z-index:3;
+  }
+
+  .env-sub{
+    position:absolute;
+    left:0; right:0;
+    bottom:16px;
+    text-align:center;
+    font-size:0.7rem;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--pink);
+    font-weight:500;
+    opacity:0.9;
+  }
+
+  /* ---------------- BUNNY STICKERS ---------------- */
+  /* A little vertical stack tucked along the right edge of the envelope,
+     below the stamp — hearts, blush, sparkles, eating, top to bottom.
+     Each gets its own gentle tilt and a soft two-part shadow (a tight
+     dark one + a wider tinted one) so they read like stickers sitting
+     just above the paper rather than flat artwork printed on it. */
+  .bunny-stack{
+    position:absolute;
+    top:80px;
+    right:14px;
+    z-index:4;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    pointer-events:none;
+  }
+  .bunny-stack img{
+    width:20px;
+    height:20px;
+    object-fit:contain;
+    filter:
+      drop-shadow(0 1px 1px rgba(74,44,77,0.25))
+      drop-shadow(0 3px 5px rgba(214,120,160,0.35));
+  }
+  .bunny-stack img:nth-child(1){ transform:rotate(-8deg); }
+  .bunny-stack img:nth-child(2){ transform:rotate(6deg); }
+  .bunny-stack img:nth-child(3){ transform:rotate(-5deg); }
+  .bunny-stack img:nth-child(4){ transform:rotate(7deg); }
+
+  /* ---------------- FLOWERS ---------------- */
+  /* Each flower is positioned relative to #stage, near a corner of the
+     envelope. They're pinned with absolute positioning + a translate offset,
+     so they move as a "layer" of the scene along with the envelope. */
+
+  .flower{
+    position:absolute;
+    width:70px;
+    height:70px;
+    pointer-events:none;
+    filter: drop-shadow(0 6px 8px rgba(74,44,77,0.16));
+  }
+  .flower.lily{
+    top:calc(50% - 175px);
+    left:calc(50% - 230px);
+  }
+  .flower.rose{
+    top:calc(50% + 110px);
+    left:calc(50% + 170px);
+    width:64px;
+    height:64px;
+  }
+  .flower.snap{
+    top:calc(50% - 150px);
+    left:calc(50% + 190px);
+    width:60px;
+    height:60px;
+  }
+  .flower.fmn{
+    top:calc(50% + 120px);
+    left:calc(50% - 250px);
+    width:58px;
+    height:58px;
+  }
+
+  @media (max-width: 640px){
+    #envelope{ width:230px; height:158px; }
+    .env-flap{ border-left-width:117px; border-right-width:117px; border-top-width:82px; }
+    .env-flap::before{ border-left-width:119px; border-right-width:119px; border-top-width:84px; }
+    .env-text{ font-size:1.25rem; }
+    .env-subtitle{ font-size:0.6rem; }
+    .env-sub{ font-size:0.62rem; bottom:14px; }
+    .env-stamp{ width:36px; height:44px; top:10px; right:10px; }
+    .env-flower-stamp{ width:26px; height:26px; }
+    .flower{ width:44px; height:44px; }
+    .flower.lily{ top:calc(50% - 130px); left:calc(50% - 140px); width:44px; height:44px; }
+    .flower.rose{ top:calc(50% + 90px); left:calc(50% + 110px); width:40px; height:40px; }
+    .flower.snap{ top:calc(50% - 110px); left:calc(50% + 120px); width:38px; height:38px; }
+    .flower.fmn{ top:calc(50% + 95px); left:calc(50% - 150px); width:36px; height:36px; }
+    .bunny-stack{ top:64px; right:10px; gap:5px; }
+    .bunny-stack img{ width:16px; height:16px; }
+  }
+
+  /* Small phones (iPhone SE and similar, ~375px and under). Without this,
+     the flower offsets above (tuned for ~400-640px screens) start pushing
+     into the envelope's edges on narrower devices — this tightens
+     everything further in proportionally so nothing touches. */
+  @media (max-width: 400px){
+    #envelope{ width:200px; height:138px; }
+    .env-flap{ border-left-width:102px; border-right-width:102px; border-top-width:72px; }
+    .env-flap::before{ border-left-width:104px; border-right-width:104px; border-top-width:74px; }
+    .env-text{ font-size:1.1rem; }
+    .env-subtitle{ font-size:0.56rem; }
+    .env-sub{ font-size:0.58rem; bottom:12px; }
+    .env-stamp{ width:32px; height:38px; top:8px; right:8px; }
+    .env-flower-stamp{ width:22px; height:22px; }
+    .flower{ width:36px; height:36px; }
+    .flower.lily{ top:calc(50% - 108px); left:calc(50% - 112px); width:36px; height:36px; }
+    .flower.rose{ top:calc(50% + 74px); left:calc(50% + 88px); width:33px; height:33px; }
+    .flower.snap{ top:calc(50% - 92px); left:calc(50% + 96px); width:31px; height:31px; }
+    .flower.fmn{ top:calc(50% + 78px); left:calc(50% - 120px); width:30px; height:30px; }
+    .bunny-stack{ top:55px; right:8px; gap:4px; }
+    .bunny-stack img{ width:14px; height:14px; }
+  }
+
+  /* ---------------- PAGE DOTS ----------------
+     Fixed bottom-center indicator showing how many pages/steps there are
+     in this journey, with the current page shown as a larger filled dot.
+     TO ADD A NEW PAGE LATER: add another <span class="dot"> in the
+     #page-dots markup below (bottom of <body>) and bump TOTAL_PAGES in
+     the <script> at the bottom. */
+  #page-dots{
+    position:fixed;
+    left:50%;
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    transform:translateX(-50%);
+    display:flex;
+    align-items:center;
+    gap:8px;
+    z-index:20;
+  }
+  #page-dots .dot{
+    display:inline-block;
+    width:12px;
+    height:12px;
+    opacity:0.35;
+    transition: transform 0.3s ease, opacity 0.3s ease, width 0.3s ease, height 0.3s ease;
+    /* Each dot gets its own slight tilt (set inline per-span below) so the
+       row of hearts feels hand-placed/playful rather than perfectly aligned.
+       --tilt is combined with the active-state scale in the rule below. */
+    transform: rotate(var(--tilt, 0deg));
+  }
+  #page-dots .dot svg{
+    width:100%;
+    height:100%;
+    fill:var(--pink);
+    display:block;
+  }
+  #page-dots .dot.active{
+    width:16px;
+    height:16px;
+    opacity:1;
+    transform: rotate(var(--tilt, 0deg)) scale(1.15);
+  }
+  @media (max-width: 640px){
+    #page-dots{ bottom: calc(14px + env(safe-area-inset-bottom, 0px)); gap:6px; }
+    #page-dots .dot{ width:10px; height:10px; }
+    #page-dots .dot.active{ width:13px; height:13px; }
+  }
+
+  /* ---------------- SOUND TOGGLE ---------------- */
+  #sound-toggle{
+    position:fixed;
+    top: calc(16px + env(safe-area-inset-top, 0px));
+    right: calc(16px + env(safe-area-inset-right, 0px));
+    width:44px;
+    height:44px;
+    border-radius:50%;
+    border:2px solid var(--pink);
+    background: linear-gradient(180deg, #FFFFFF, #FDF4F8);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    z-index:20;
+    padding:0;
+    box-shadow: 0 4px 12px -2px rgba(214,120,160,0.35);
+    transition: transform 0.2s ease;
+  }
+  #sound-toggle:hover{ transform:scale(1.06); }
+  #sound-toggle svg{ width:22px; height:22px; }
+  #sound-toggle .wave,
+  #sound-toggle .mute-x{ transition: opacity 0.2s ease; }
+  #sound-toggle .mute-x{ opacity:0; }
+  #sound-toggle.muted .wave{ opacity:0; }
+  #sound-toggle.muted .mute-x{ opacity:1; }
+  @media (max-width: 640px){
+    #sound-toggle{
+      top: calc(10px + env(safe-area-inset-top, 0px));
+      right: calc(10px + env(safe-area-inset-right, 0px));
+      width:36px; height:36px;
+    }
+    #sound-toggle svg{ width:18px; height:18px; }
+  }
+
+  /* ---------------- VOLUME CONTROL ---------------- */
+  /* Wraps the round mute/volume button so the slider capsule has a
+     positioning anchor to grow out of. */
+  #volume-control{
+    position:relative;
+    display:flex;
+    margin-top:6px;
+  }
+  /* The speaker icon itself lives in this inner wrapper so it can spin
+     independently of the button's own hover scale. Clicking the button
+     spins it hard at first and eases off — same trick both directions,
+     just opposite rotation — like winding/unwinding a little top. */
+  .icon-spin{ display:flex; will-change:transform; }
+  .icon-spin.spin-open{
+    animation: volume-spin-out 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .icon-spin.spin-close{
+    animation: volume-spin-in 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  @keyframes volume-spin-out{
+    from{ transform:rotate(0deg); }
+    to{ transform:rotate(1080deg); }
+  }
+  @keyframes volume-spin-in{
+    from{ transform:rotate(0deg); }
+    to{ transform:rotate(-1080deg); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .icon-spin.spin-open,
+    .icon-spin.spin-close{ animation:none; }
+  }
+
+  /* The slider itself: a slim rounded capsule that grows straight down
+     out of the button, matching the oval shape she drew. Closed, it has
+     zero height and is fully transparent so it takes no space; opening
+     it just animates height + opacity together for a soft "slide out"
+     rather than an abrupt reveal. */
+  #volume-slider{
+    position:absolute;
+    top: calc(100% + 6px);
+    left:50%;
+    transform: translateX(-50%);
+    width:30px;
+    height:0px;
+    border-radius:999px;
+    border:2px solid var(--pink);
+    background: linear-gradient(180deg, #FFFFFF, #FDF4F8);
+    box-shadow: 0 4px 12px -2px rgba(214,120,160,0.35);
+    opacity:0;
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    pointer-events:none;
+    z-index:19;
+    transition: height 0.55s cubic-bezier(0.16,1,0.3,1), opacity 0.3s ease;
+  }
+  #volume-slider.open{
+    height:128px;
+    opacity:1;
+    pointer-events:auto;
+  }
+  #volume-slider-track{
+    position:relative;
+    width:6px;
+    height:calc(100% - 30px);
+    margin:15px 0;
+    border-radius:3px;
+    background: rgba(214,105,154,0.22);
+    cursor:pointer;
+    touch-action:none;
+  }
+  #volume-slider-fill{
+    position:absolute;
+    left:0; right:0; bottom:0;
+    height:28%;
+    border-radius:3px;
+    background:#D6699A;
+  }
+  #volume-slider-thumb{
+    position:absolute;
+    left:50%;
+    bottom:28%;
+    transform: translate(-50%, 50%);
+    width:15px;
+    height:15px;
+    border-radius:50%;
+    background:#D6699A;
+    border:2px solid #FFFFFF;
+    box-shadow: 0 2px 6px -1px rgba(214,120,160,0.5);
+    cursor:grab;
+  }
+  #volume-slider-thumb:active{ cursor:grabbing; }
+  @media (max-width: 640px){
+    #volume-slider{ width:26px; }
+    #volume-slider.open{ height:108px; }
+    #volume-slider-thumb{ width:13px; height:13px; }
+  }
+
+  /* ---------------- SONG PICKER ---------------- */
+  #music-cluster{
+    position:fixed;
+    top: calc(16px + env(safe-area-inset-top, 0px));
+    right: calc(16px + env(safe-area-inset-right, 0px));
+    z-index:20;
+    display:flex;
+    align-items:flex-start;
+    gap:4px;
+  }
+  #music-cluster #volume-control{ position:relative; }
+  #music-cluster #sound-toggle{ position:static; box-shadow: 0 4px 12px -2px rgba(214,120,160,0.35); }
+  /* Small nudges so the hint text and the music player pill visually
+     line up with the (taller) round mute button beside them, instead of
+     sitting above its center. */
+  #song-hint{ margin-top:8px; }
+  #song-picker-wrap{ margin-top:6px; }
+
+  /* Hand-drawn-style arrows pointing at what each hint refers to. The
+     hint and its arrow stay close together (small, non-overlapping gap
+     so the arrow is never hidden behind the hint bubble) — the whole
+     hint+arrow pair is pulled toward the song picker via the arrow's
+     own right-side margin instead, so it reads as "closer to the
+     interface" without swallowing the arrow. */
+  #song-hint-arrow{
+    width:34px;
+    height:28px;
+    align-self:flex-start;
+    flex-shrink:0;
+    margin-top:10px;
+    margin-left:-2px;
+    margin-right:-90px;
+    pointer-events:none;
+    opacity:1;
+    transition: opacity 0.6s ease, visibility 0.6s;
+  }
+  #song-hint.hidden + #song-hint-arrow{
+    opacity:0;
+    visibility:hidden;
+  }
+  /* Groups the controls row + skip hint so the arrow's position is based
+     only on the space between those two, not the whole player stack
+     (which also includes the taller song-label row above). */
+  #skip-hint-group{
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:9px;
+  }
+  #skip-hint-arrow{
+    position:absolute;
+    width:26px;
+    height:56px;
+    right:-20px;
+    bottom:6px;
+    pointer-events:none;
+    opacity:1;
+    transition: opacity 0.6s ease, visibility 0.6s;
+  }
+  #skip-hint.hidden + #skip-hint-arrow{
+    opacity:0;
+    visibility:hidden;
+  }
+
+  #song-hint{
+    font-family:'Baloo 2', sans-serif;
+    font-size:13px;
+    color:#D6699A;
+    background: linear-gradient(180deg, #FFFFFF, #FDF4F8);
+    border:2px solid var(--pink);
+    border-radius:999px;
+    padding:6px 12px;
+    white-space:nowrap;
+    box-shadow: 0 4px 12px -2px rgba(214,120,160,0.35);
+    opacity:1;
+    transform: translateY(0);
+    transition: opacity 0.6s ease, transform 0.6s ease, visibility 0.6s;
+    pointer-events:none;
+  }
+  #song-hint.hidden{
+    opacity:0;
+    transform: translateY(-4px);
+    visibility:hidden;
+  }
+
+  /* Second hint — same look as #song-hint above, just tucked under the
+     player pill pointing at the progress row instead of the top pill. */
+  #skip-hint{
+    align-self:flex-end;
+    margin-top:2px;
+    font-family:'Baloo 2', sans-serif;
+    font-size:13px;
+    color:#D6699A;
+    background: linear-gradient(180deg, #FFFFFF, #FDF4F8);
+    border:2px solid var(--pink);
+    border-radius:999px;
+    padding:6px 12px;
+    white-space:nowrap;
+    box-shadow: 0 4px 12px -2px rgba(214,120,160,0.35);
+    opacity:1;
+    transform: translateY(0);
+    transition: opacity 0.6s ease, transform 0.6s ease, visibility 0.6s;
+    pointer-events:none;
+  }
+  #skip-hint.hidden{
+    opacity:0;
+    transform: translateY(-4px);
+    visibility:hidden;
+  }
+
+  #song-picker-wrap{ position:relative; display:flex; flex-direction:column; align-items:flex-end; gap:9px; }
+  #song-label-anchor{ position:relative; }
+  #song-label{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:600;
+    font-size:13px;
+    color:#D6699A;
+    background: linear-gradient(180deg, #FFFFFF, #FDF4F8);
+    border:2px solid var(--pink);
+    border-radius:999px;
+    padding:8px 14px;
+    width:150px;
+    cursor:pointer;
+    box-shadow: 0 4px 12px -2px rgba(214,120,160,0.35);
+    transition: transform 0.2s ease;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  #song-label:hover{ transform:scale(1.04); }
+  #song-label .note{ flex-shrink:0; display:block; }
+  /* Marquee: the outer span clips, the inner span holds the text and
+     scrolls sideways only when the title is actually wider than the
+     box (the .scrolling class is toggled on in JS once measured). */
+  #song-label .song-title-text{
+    overflow:hidden;
+    display:block;
+    flex:1;
+    min-width:0;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 10px, #000 calc(100% - 10px), transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0, #000 10px, #000 calc(100% - 10px), transparent 100%);
+  }
+  #song-label .title-inner{
+    display:inline-block;
+    white-space:nowrap;
+    opacity:1;
+    transition: opacity 0.35s ease;
+  }
+  #song-label .title-inner.fading{
+    opacity:0;
+  }
+  #song-label .song-title-text.scrolling .title-inner{
+    animation: song-marquee var(--marquee-dur, 18s) cubic-bezier(0.45, 0, 0.55, 1) 1.5s infinite;
+  }
+  @keyframes song-marquee{
+    0%{ transform: translateX(0); }
+    12%{ transform: translateX(0); }
+    50%{ transform: translateX(var(--marquee-dist, -60px)); }
+    62%{ transform: translateX(var(--marquee-dist, -60px)); }
+    100%{ transform: translateX(0); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    #song-label .song-title-text.scrolling .title-inner{ animation:none; }
+  }
+
+  /* Progress row: sits directly under the pill, same pink family so it
+     reads as one connected player rather than a separate element. */
+
+  /* Row under the label: a small round play/pause button to the left of
+     the seeker bubble. The pair's right edge lines up with the label's
+     right edge (via align-items:flex-end on the parent column), while
+     the button itself can poke out further left. */
+  #song-controls-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  #play-pause-toggle{
+    width:28px;
+    height:28px;
+    border-radius:50%;
+    border:2px solid var(--pink);
+    background: linear-gradient(180deg, #FFFFFF, #FDF4F8);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    padding:0;
+    flex-shrink:0;
+    box-shadow: 0 3px 10px -3px rgba(214,120,160,0.3);
+    transition: transform 0.2s ease;
+  }
+  #play-pause-toggle:hover{ transform:scale(1.08); }
+  #play-pause-toggle svg{ width:13px; height:13px; }
+  #play-pause-toggle .icon-play{ opacity:0; }
+  #play-pause-toggle .icon-pause{ opacity:1; }
+  #play-pause-toggle.paused .icon-play{ opacity:1; }
+  #play-pause-toggle.paused .icon-pause{ opacity:0; }
+
+  #song-progress-row{
+    width:120px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    background: linear-gradient(180deg, #FDF4F8, #FFFFFF);
+    border:2px solid var(--pink);
+    border-radius:999px;
+    padding:4px 10px;
+    box-shadow: 0 3px 10px -3px rgba(214,120,160,0.3);
+    cursor:pointer;
+    transition: transform 0.15s ease;
+  }
+  #song-progress-row:active{ transform: scale(0.97); }
+  #song-time-elapsed,
+  #song-time-total{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:600;
+    font-size:10.5px;
+    color:#D6699A;
+    flex-shrink:0;
+    line-height:1;
+  }
+  #song-progress-track{
+    flex:1;
+    height:4px;
+    border-radius:3px;
+    background: rgba(214,105,154,0.22);
+    overflow:hidden;
+    cursor:pointer;
+  }
+  #song-progress-fill{
+    height:100%;
+    width:0%;
+    background: #D6699A;
+    border-radius:3px;
+    transition: width 0.15s linear;
+  }
+
+  /* Tapping the mini player itself (the progress row) opens the big
+     enlarged player below — no separate button needed. */
+
+  /* ---------------- ENLARGED PLAYER ---------------- */
+  #player-expanded{
+    position:fixed;
+    inset:0;
+    z-index:60;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+  }
+  #player-expanded.open{
+    opacity:1;
+    visibility:visible;
+    pointer-events:auto;
+    transition: opacity 0.3s ease;
+  }
+  #player-expanded-backdrop{
+    position:absolute;
+    inset:0;
+    background: rgba(120,50,80,0.35);
+    backdrop-filter: blur(3px);
+  }
+  #player-expanded-panel{
+    position:relative;
+    width:min(340px, 86vw);
+    background: linear-gradient(180deg, #FFFFFF, #FDF4F8);
+    border:2px solid var(--pink);
+    border-radius:26px;
+    padding:34px 26px 26px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:22px;
+    box-shadow: 0 24px 60px -20px rgba(214,120,160,0.55);
+    transform: translateY(10px) scale(0.97);
+    transition: transform 0.3s ease;
+  }
+  #player-expanded.open #player-expanded-panel{
+    transform: translateY(0) scale(1);
+  }
+  #player-collapse-btn{
+    position:absolute;
+    top:14px;
+    right:14px;
+    width:32px;
+    height:32px;
+    border-radius:50%;
+    border:none;
+    background: rgba(242,166,198,0.18);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    padding:0;
+    transition: transform 0.2s ease, background 0.2s ease;
+  }
+  #player-collapse-btn:hover{ background: rgba(242,166,198,0.32); transform:scale(1.06); }
+  #player-collapse-btn svg{ width:16px; height:16px; }
+  #player-expanded-title{
+    width:100%;
+    text-align:center;
+    padding:0 12px;
+  }
+  #player-expanded-song{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:600;
+    font-size:16px;
+    color:#D6699A;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+  }
+  #player-expanded-artist{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:500;
+    font-size:12px;
+    color:#F2A6C6;
+    margin-top:2px;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+  }
+  #player-expanded-progress{
+    width:100%;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  #player-expanded-elapsed,
+  #player-expanded-total{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:600;
+    font-size:12px;
+    color:#D6699A;
+    flex-shrink:0;
+    min-width:32px;
+    line-height:1;
+  }
+  #player-expanded-elapsed{ text-align:right; }
+  /* Big touch target: the visible track is thin, but the clickable area
+     (via padding) is much taller, so tapping/dragging near the line still
+     registers — this is the actual fix for "hard to skip on phone". */
+  #player-expanded-track{
+    position:relative;
+    flex:1;
+    height:34px;
+    display:flex;
+    align-items:center;
+    touch-action:none;
+  }
+  #player-expanded-track::before{
+    content:"";
+    position:absolute;
+    left:0;
+    right:0;
+    top:50%;
+    height:6px;
+    transform: translateY(-50%);
+    border-radius:4px;
+    background: rgba(214,105,154,0.22);
+  }
+  #player-expanded-fill{
+    position:absolute;
+    left:0;
+    top:50%;
+    height:6px;
+    width:0%;
+    transform: translateY(-50%);
+    border-radius:4px;
+    background: #D6699A;
+    pointer-events:none;
+  }
+  #player-expanded-thumb{
+    position:absolute;
+    top:50%;
+    left:0%;
+    width:20px;
+    height:20px;
+    border-radius:50%;
+    background:#D6699A;
+    border:3px solid #FFFFFF;
+    box-shadow: 0 3px 8px -2px rgba(214,120,160,0.6);
+    transform: translate(-50%, -50%);
+    cursor:grab;
+    touch-action:none;
+    transition: transform 0.15s ease;
+  }
+  /* Invisible padding around the visible dot so it's easy to grab with a
+     thumb on a phone screen without the hit area looking oversized. */
+  #player-expanded-thumb::after{
+    content:"";
+    position:absolute;
+    inset:-14px;
+  }
+  #player-expanded-thumb:active{ cursor:grabbing; }
+  #player-expanded-track:active #player-expanded-thumb,
+  #player-expanded-track.dragging #player-expanded-thumb{
+    transform: translate(-50%, -50%) scale(1.15);
+  }
+  #player-expanded-controls{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:26px;
+    /* The shuffle/loop column on the right has no counterpart on the
+       left, so centering the row as a whole visually drags the
+       rewind/play/skip trio left of true-center. Nudge everything right
+       to compensate. */
+    padding-left:24px;
+  }
+  #player-prev-btn,
+  #player-next-btn{
+    width:48px;
+    height:48px;
+    border-radius:50%;
+    border:none;
+    background: rgba(242,166,198,0.16);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    padding:0;
+    transition: transform 0.2s ease, background 0.2s ease;
+  }
+  #player-prev-btn:hover,
+  #player-next-btn:hover{ background: rgba(242,166,198,0.3); transform:scale(1.06); }
+  #player-prev-btn svg,
+  #player-next-btn svg{ width:22px; height:22px; }
+  #player-expanded-play{
+    width:62px;
+    height:62px;
+    border-radius:50%;
+    border:2px solid var(--pink);
+    background: linear-gradient(180deg, #FFFFFF, #FDF4F8);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    padding:0;
+    box-shadow: 0 8px 20px -6px rgba(214,120,160,0.45);
+    transition: transform 0.2s ease;
+  }
+  #player-expanded-play:hover{ transform:scale(1.06); }
+  #player-expanded-play svg{ width:26px; height:26px; }
+  #player-expanded-play .icon-play{ opacity:0; }
+  #player-expanded-play .icon-pause{ opacity:1; }
+  #player-expanded-play.paused .icon-play{ opacity:1; }
+  #player-expanded-play.paused .icon-pause{ opacity:0; }
+
+  /* Shuffle / loop toggles — same rounded, bordered "pill" look as the
+     main play button, just smaller, stacked to its right. Color signals
+     state: gray while off, pink once she's turned it on. */
+  #player-side-controls{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin-left:-8px;
+  }
+  .side-toggle-btn{
+    width:32px;
+    height:32px;
+    border-radius:50%;
+    border:2px solid var(--pink);
+    background: linear-gradient(180deg, #FFFFFF, #FDF4F8);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    padding:0;
+    color:#C9C4CB;
+    box-shadow: 0 4px 10px -4px rgba(214,120,160,0.4);
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+  .side-toggle-btn:hover{ transform:scale(1.08); }
+  .side-toggle-btn svg{ width:15px; height:15px; }
+  .side-toggle-btn.active{ color:#D6699A; }
+
+  /* Dropdown: scales/fades in from the label, and caps its height to
+     roughly 3 song rows — any more songs scroll within the list rather
+     than pushing the menu taller than the screen. */
+  #song-menu{
+    position:absolute;
+    top: calc(100% + 8px);
+    right:0;
+    background: linear-gradient(180deg, #FFFFFF, #FDF4F8);
+    border:2px solid var(--pink);
+    border-radius:16px;
+    box-shadow: 0 18px 40px -18px rgba(214,120,160,0.45);
+    padding:8px;
+    min-width:220px;
+    max-width:min(80vw, 280px);
+    max-height:186px;
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    z-index:30;
+    transform-origin: top right;
+    opacity:0;
+    transform: scale(0.9) translateY(-6px);
+    visibility:hidden;
+    pointer-events:none;
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+    scrollbar-width: thin;
+    scrollbar-color: #D6699A rgba(242,166,198,0.18);
+  }
+  #song-menu::-webkit-scrollbar{ width:6px; }
+  #song-menu::-webkit-scrollbar-track{ background: rgba(242,166,198,0.18); border-radius:10px; }
+  #song-menu::-webkit-scrollbar-thumb{ background:#D6699A; border-radius:10px; }
+  #song-menu.open{
+    opacity:1;
+    transform: scale(1) translateY(0);
+    visibility:visible;
+    pointer-events:auto;
+  }
+  #song-menu button{
+    font-family:'Baloo 2', sans-serif;
+    font-size:13.5px;
+    text-align:left;
+    background:none;
+    border:none;
+    border-radius:10px;
+    padding:9px 10px;
+    color:#D6699A;
+    cursor:pointer;
+    display:flex;
+    flex-direction:column;
+    line-height:1.25;
+    flex-shrink:0;
+  }
+  #song-menu button .s-title{ font-weight:600; }
+  #song-menu button .s-artist{ font-size:11.5px; opacity:0.7; }
+  #song-menu button:hover{ background: rgba(242,166,198,0.16); }
+  #song-menu button.active{ background: rgba(242,166,198,0.28); }
+  #song-menu button.active .s-title::before{ content:"♪ "; }
+
+  @media (max-width: 640px){
+    #music-cluster{
+      top: calc(10px + env(safe-area-inset-top, 0px));
+      right: calc(10px + env(safe-area-inset-right, 0px));
+      gap:3px;
+    }
+    #song-hint{ font-size:11px; padding:5px 9px; }
+    #skip-hint{ font-size:11px; padding:5px 9px; }
+    #song-label{ font-size:11.5px; padding:6px 11px; width:108px; }
+    #song-progress-row{ width:86px; padding:3px 8px; }
+    #play-pause-toggle{ width:24px; height:24px; }
+    #play-pause-toggle svg{ width:11px; height:11px; }
+    #song-time-elapsed, #song-time-total{ font-size:9.5px; }
+    #song-menu{ min-width:190px; max-height:168px; }
+  }
+
+  /* Shorter phone screens: scale the whole scene down so everything —
+     envelope, flowers, and the sound button — fits with no need to zoom
+     or scroll, on landscape or small-height devices.
+     Combined with (pointer: coarse) so this ONLY fires on touch devices —
+     without that check, a normal PC browser window that just isn't very
+     tall would trigger this and shrink everything unintentionally. */
+  @media (max-height: 700px) and (pointer: coarse){
+    #envelope{ width:190px; height:130px; }
+    .env-flap{ border-left-width:97px; border-right-width:97px; border-top-width:69px; }
+    .env-flap::before{ border-left-width:99px; border-right-width:99px; border-top-width:71px; }
+    .env-text{ font-size:1.05rem; }
+    .env-subtitle{ font-size:0.58rem; }
+    .env-sub{ font-size:0.56rem; bottom:10px; }
+    .env-stamp{ width:28px; height:34px; top:7px; right:7px; }
+    .env-flower-stamp{ width:20px; height:20px; }
+    .tulip-reveal{ width:64px; height:52px; top:-52px; }
+    .tulip-item.t-left{ width:32px; height:32px; }
+    .tulip-item.t-center{ width:42px; height:42px; }
+    .tulip-item.t-right{ width:32px; height:32px; }
+    .flower{ width:32px; height:32px; }
+    .flower.lily{ top:calc(50% - 96px); left:calc(50% - 100px); width:32px; height:32px; }
+    .flower.rose{ top:calc(50% + 66px); left:calc(50% + 78px); width:29px; height:29px; }
+    .flower.snap{ top:calc(50% - 82px); left:calc(50% + 86px); width:22px; height:22px; }
+    .flower.fmn{ top:calc(50% + 70px); left:calc(50% - 106px); width:21px; height:21px; }
+    #sound-toggle{
+      top: calc(8px + env(safe-area-inset-top, 0px));
+      right: calc(8px + env(safe-area-inset-right, 0px));
+      width:32px; height:32px;
+    }
+    #sound-toggle svg{ width:16px; height:16px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    #stage{ transition:none; }
+    #envelope{ transition:none; }
+    .env-flap{ transition:none; }
+    .tulip-reveal{ transition:none; }
+  }
+
+  /* ---- Entry overlay ----
+     Sits above literally everything (higher z-index than the .screen
+     layers) so nothing underneath is reachable until she taps in.
+     backdrop-filter blurs whatever's rendered behind it — the envelope
+     scene — without needing a separate blurred copy of anything. */
+  #entry-overlay{
+    position:fixed;
+    inset:0;
+    z-index:1000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(255,255,255,0.5);
+    -webkit-backdrop-filter:blur(18px);
+    backdrop-filter:blur(18px);
+    transition: opacity 0.8s ease, visibility 0s linear 0.8s;
+  }
+  #entry-overlay.entered{
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+  }
+  #entry-btn{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:14px;
+    background:none;
+    border:none;
+    cursor:pointer;
+    padding:20px 28px;
+    font-family:'Comfortaa', 'Baloo 2', sans-serif;
+    font-weight:600;
+    font-size:1.05rem;
+    letter-spacing:0.04em;
+    text-transform:lowercase;
+    color:#D6699A;
+    animation: entryPulse 1.8s ease-in-out infinite;
+  }
+  #entry-btn .entry-heart{
+      width:40px;
+      height:40px;
+      object-fit:contain;
+      filter: drop-shadow(0 2px 6px rgba(230,120,160,0.4));
+  }
+  @keyframes entryPulse{
+    0%, 100%{ transform:scale(1); opacity:0.85; }
+    50%{ transform:scale(1.06); opacity:1; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    #entry-overlay{ transition:none; }
+    #entry-btn{ animation:none; }
+  }
