@@ -1350,18 +1350,23 @@
   /* Small nudges so the hint text and the music player pill visually
      line up with the (taller) round mute button beside them, instead of
      sitting above its center. */
-  #song-hint{ margin-top:8px; margin-right:-10px; }
+  #song-hint{ margin-top:8px; }
   #song-picker-wrap{ margin-top:6px; }
 
-  /* Hand-drawn-style arrows pointing at what each hint refers to. */
+  /* Hand-drawn-style arrows pointing at what each hint refers to. The
+     hint and its arrow stay close together (small, non-overlapping gap
+     so the arrow is never hidden behind the hint bubble) — the whole
+     hint+arrow pair is pulled toward the song picker via the arrow's
+     own right-side margin instead, so it reads as "closer to the
+     interface" without swallowing the arrow. */
   #song-hint-arrow{
-    width:30px;
+    width:34px;
     height:28px;
     align-self:flex-start;
     flex-shrink:0;
     margin-top:10px;
-    margin-left:-10px;
-    margin-right:-10px;
+    margin-left:-2px;
+    margin-right:-18px;
     pointer-events:none;
     opacity:1;
     transition: opacity 0.6s ease, visibility 0.6s;
