@@ -1012,7 +1012,6 @@
   updatePlayPauseUI();
 
   function togglePlayback(){
-    songHint.classList.add('hidden');
     if (music.paused || music.ended){
       hasStartedMusic = true;
       attemptedMusic = true;
@@ -1032,7 +1031,6 @@
 
   playPauseToggle.addEventListener('click', (e) => {
     e.stopPropagation();
-    hideSkipHint();
     togglePlayback();
   });
   playerExpandedPlay.addEventListener('click', (e) => {
@@ -1121,7 +1119,6 @@
   function openPlayerExpanded(){
     playerExpanded.classList.add('open');
     playerExpanded.setAttribute('aria-hidden', 'false');
-    songHint.classList.add('hidden');
   }
   function closePlayerExpanded(){
     playerExpanded.classList.remove('open');
@@ -1213,10 +1210,9 @@
     } else {
       openSongMenu();
     }
-    // Tapping the music player itself also counts as "found it" — the
-    // hint can go away for good.
+    // Tapping the song label itself also counts as "found it" — the
+    // change-song hint can go away for good.
     songHint.classList.add('hidden');
-    hideSkipHint();
   });
   document.addEventListener('click', (e) => {
     if (!songMenu.contains(e.target) && e.target !== songLabel){
@@ -1392,7 +1388,6 @@
     } else {
       openVolumeSlider();
     }
-    songHint.classList.add('hidden');
     if (!hasStartedMusic){
       hasStartedMusic = true;
       music.volume = currentVolume;
