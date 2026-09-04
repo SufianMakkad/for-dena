@@ -1350,18 +1350,18 @@
   /* Small nudges so the hint text and the music player pill visually
      line up with the (taller) round mute button beside them, instead of
      sitting above its center. */
-  #song-hint{ margin-top:8px; }
+  #song-hint{ margin-top:8px; margin-right:-10px; }
   #song-picker-wrap{ margin-top:6px; }
 
   /* Hand-drawn-style arrows pointing at what each hint refers to. */
   #song-hint-arrow{
-    width:38px;
+    width:30px;
     height:28px;
     align-self:flex-start;
     flex-shrink:0;
     margin-top:10px;
-    margin-left:-2px;
-    margin-right:-2px;
+    margin-left:-10px;
+    margin-right:-10px;
     pointer-events:none;
     opacity:1;
     transition: opacity 0.6s ease, visibility 0.6s;
@@ -1384,8 +1384,8 @@
     position:absolute;
     width:26px;
     height:56px;
-    right:14px;
-    bottom:2px;
+    right:-20px;
+    bottom:6px;
     pointer-events:none;
     opacity:1;
     transition: opacity 0.6s ease, visibility 0.6s;
@@ -1739,6 +1739,11 @@
     align-items:center;
     justify-content:center;
     gap:26px;
+    /* The shuffle/loop column on the right has no counterpart on the
+       left, so centering the row as a whole visually drags the
+       rewind/play/skip trio left of true-center. Nudge everything right
+       to compensate. */
+    padding-left:24px;
   }
   #player-prev-btn,
   #player-next-btn{
