@@ -18,10 +18,13 @@ window.SONGS = [
   { title: "KALAMANTINA | كلمنتينا" , artist: "Saint Levant ft. Marwan Moussa", data: "assets/audio/Kalamantina.mp3" },
   { title: "Supernatural", artist: "NewJeans", data: "assets/audio/Supernatural.mp3" },
   { title: "Apple Cider", artist: "beabadoobee", data: "assets/audio/Apple%20Cider.mp3" },
+  { title: "If You Want To", artist: "beabadoobee", data: "assets/audio/If%20You%20Want%20To.mp3" },
   { title: "Scott and Zelda", artist: "BIBI", data: "assets/audio/Scott%20and%20Zelda.mp3" },
   { title: "may you never forget me", artist: "Temachii", data: "assets/audio/may%20you%20never%20forget%20me.mp3" },
   { title: "ESCORT", artist: "Chase Atlantic", data: "assets/audio/ESCORT.mp3" },
   { title: "Puddles", artist: "Not For Radio", data: "assets/audio/Puddles.mp3" },
   { title: "ONLY", artist: "LeeHi", data: "assets/audio/ONLY.mp3" },
   { title: "if it's not you", artist: "PRYVT", data: "assets/audio/if%20it%27s%20not%20you.mp3" },
+  { title: "Drugs N Hella Melodies", artist: "Don Toliver, Kali Uchis", data: "assets/audio/Drugs%20N%20Hella%20Melodies.mp3" },
+  { title: "Kalam Eineh | كلام عينيه", artist: "Sherine", data: "assets/audio/Kalam%20Eineh.mp3" },
 ];
