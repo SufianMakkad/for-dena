@@ -1355,11 +1355,13 @@
 
   /* Hand-drawn-style arrows pointing at what each hint refers to. */
   #song-hint-arrow{
-    width:44px;
-    height:26px;
+    width:56px;
+    height:28px;
     align-self:flex-start;
     flex-shrink:0;
-    margin-top:6px;
+    margin-top:10px;
+    margin-left:-6px;
+    margin-right:-6px;
     pointer-events:none;
     opacity:1;
     transition: opacity 0.6s ease, visibility 0.6s;
@@ -1382,7 +1384,7 @@
     position:absolute;
     width:26px;
     height:56px;
-    right:-18px;
+    right:-4px;
     bottom:-6px;
     pointer-events:none;
     opacity:1;
