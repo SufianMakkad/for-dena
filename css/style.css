@@ -1886,32 +1886,43 @@
   #song-menu button.active .s-title::before{ content:"♪ "; }
 
   @media (max-width: 640px){
-    /* On phones the cluster (hint bubble + arrow + song picker + volume
-       button) is switched from a horizontal row to a right-aligned
-       vertical stack. Left as a row, its combined width is wider than
-       most phone screens, which was pushing the whole cluster (and, via
-       the oversized fixed-position box, the page's scrollable area)
-       partly off the left/right edge and out of center. Stacking it
-       keeps every piece within the viewport, right-aligned like before. */
+    /* Keep the same row layout as desktop (song hint -> arrow -> song
+       picker -> volume button, left to right) so the mobile player looks
+       identical to the PC one — just smaller. The only real problem on
+       phones was the "you can change the song here" hint: as a normal
+       flex item, its long one-line text made the whole row wider than
+       the screen and dragged the page off-center. Pulling just that
+       hint (+ its arrow) out of the flex flow with position:absolute
+       fixes that — it now floats above the picker instead of stretching
+       the row, so the picker + volume button stay tight together and
+       lined up exactly like the PC version. */
     #music-cluster{
       top: calc(10px + env(safe-area-inset-top, 0px));
       right: calc(10px + env(safe-area-inset-right, 0px));
       max-width: calc(100vw - 20px - env(safe-area-inset-right, 0px));
-      flex-direction:column;
-      align-items:flex-end;
-      gap:6px;
+      gap:3px;
     }
-    /* The connecting arrows were drawn to point sideways (hint -> picker
-       sitting next to it in a row). Stacked vertically now, a sideways
-       arrow no longer points at anything useful, so it's rotated to
-       point downward at the element now sitting underneath it instead. */
+    #song-hint{
+      position:absolute;
+      top:-34px;
+      right:0;
+      font-size:11px;
+      padding:5px 9px;
+      white-space:normal;
+      text-align:center;
+      max-width: calc(100vw - 20px - env(safe-area-inset-right, 0px));
+      z-index:1;
+    }
     #song-hint-arrow{
-      margin:0 2px 0 0;
-      align-self:flex-end;
+      position:absolute;
+      top:-8px;
+      right:2px;
+      width:22px;
+      height:18px;
+      margin:0;
       transform: rotate(90deg);
     }
-    #skip-hint-arrow{ display:none; }
-    #song-hint, #skip-hint{
+    #skip-hint{
       font-size:11px;
       padding:5px 9px;
       white-space:normal;
