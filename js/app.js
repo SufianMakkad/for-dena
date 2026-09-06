@@ -60,63 +60,13 @@
       });
     });
   } else {
-    // ---- Tilt parallax, phones only ----
-    // Same idea as the mousemove effect above, but driven by the device's
-    // gyroscope: tilting the phone left/right/forward/back shifts the
-    // three depth layers instead of a mouse position.
-    const maxDriftFg = 14;
-    const maxDriftFlowers = 10;
-    const maxDriftBg = 4;
-    const maxDriftText = 16;     // slide 2 text + buttons — noticeably more than the background
-    const maxTiltDeg = 20; // how far she has to tilt to hit max drift
-
-    function applyTilt(betaDeg, gammaDeg){
-      // gamma: left/right tilt (-90 to 90), beta: front/back tilt (-180 to 180)
-      const xFraction = Math.max(-1, Math.min(1, gammaDeg / maxTiltDeg));
-      const yFraction = Math.max(-1, Math.min(1, (betaDeg - 30) / maxTiltDeg)); // ~30° is a natural "holding the phone" angle, treated as center
-
-      stage.style.transform = `translate(${xFraction * maxDriftFg}px, ${yFraction * maxDriftFg}px)`;
-      flowerLayer.style.transform = `translate(${xFraction * maxDriftFlowers}px, ${yFraction * maxDriftFlowers}px)`;
-      bgLayer.style.transform = `translate(${xFraction * maxDriftBg}px, ${yFraction * maxDriftBg}px)`;
-      nextScreenParallax.style.setProperty('--parallax-x', `${xFraction * maxDriftText}px`);
-      nextScreenParallax.style.setProperty('--parallax-y', `${yFraction * maxDriftText}px`);
-      storyParallaxEls.forEach((el) => {
-        el.style.setProperty('--parallax-x', `${xFraction * maxDriftText}px`);
-        el.style.setProperty('--parallax-y', `${yFraction * maxDriftText}px`);
-      });
-    }
-
-
-    function handleOrientation(e){
-      if (e.beta === null || e.gamma === null) return;
-      applyTilt(e.beta, e.gamma);
-    }
-
-    function startTiltListening(){
-      window.addEventListener('deviceorientation', handleOrientation);
-    }
-
-    // iOS 13+ requires an explicit permission prompt, and that prompt must
-    // be triggered directly from a user gesture (a tap). Android and older
-    // iOS just start listening right away, no prompt needed.
-    const needsIOSPermission =
-      typeof DeviceOrientationEvent !== 'undefined' &&
-      typeof DeviceOrientationEvent.requestPermission === 'function';
-
-    if (needsIOSPermission) {
-      let askedForTiltPermission = false;
-      document.addEventListener('click', function requestTiltOnce(){
-        if (askedForTiltPermission) return;
-        askedForTiltPermission = true;
-        DeviceOrientationEvent.requestPermission()
-          .then((result) => {
-            if (result === 'granted') startTiltListening();
-          })
-          .catch(() => {});
-      }, { once: true });
-    } else {
-      startTiltListening();
-    }
+    // ---- Mobile: parallax disabled ----
+    // Tilt-based (gyroscope) parallax used to live here, drifting the
+    // background/flowers/text as the phone tilted. It's intentionally
+    // removed for touch devices now — mobile just shows the scene static,
+    // with every layer left at its natural, centered position (no
+    // deviceorientation listener is attached, so nothing ever transforms
+    // these layers on phones). Desktop mouse parallax above is unaffected.
   }
 
   // ---- Page indicator dots ----
