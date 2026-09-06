@@ -1904,23 +1904,29 @@
     }
     #song-hint{
       position:absolute;
-      top:-34px;
-      right:0;
+      top:-40px;
+      left:0;
+      right:auto;
       font-size:11px;
       padding:5px 9px;
       white-space:normal;
-      text-align:center;
+      text-align:left;
       max-width: calc(100vw - 20px - env(safe-area-inset-right, 0px));
       z-index:1;
     }
     #song-hint-arrow{
       position:absolute;
       top:-8px;
-      right:2px;
+      left:16px;
+      right:auto;
       width:22px;
       height:18px;
       margin:0;
-      transform: rotate(90deg);
+      /* Mirrored + rotated so the curve now sweeps down-right from the
+         hint (sitting up and to the left) toward the song picker pill,
+         instead of the plain top-down curve used when the hint sat
+         directly above the pill. */
+      transform: scaleX(-1) rotate(100deg);
     }
     #skip-hint{
       font-size:11px;
